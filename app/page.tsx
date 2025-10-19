@@ -15,6 +15,20 @@ interface FormField {
   placeholder: string
   label: string
   required: boolean
+  // Style properties
+  fillColor: string
+  borderColor: string
+  borderWidth: string
+  borderRadius: string
+  height: string
+  // Font properties
+  fontFamily: string
+  fontWeight: string
+  fontSize: string
+  fontColor: string
+  lineHeight: string
+  letterSpacing: string
+  textAlign: "left" | "center" | "right"
 }
 
 export default function FormBuilderPage() {
@@ -101,9 +115,55 @@ export default function FormBuilderPage() {
   }
 
   const [formFields, setFormFields] = useState<FormField[]>([
-    { id: "field-1", type: "text", placeholder: "FIRST NAME", label: "FIRST NAME", required: false },
-    { id: "field-2", type: "email", placeholder: "EMAIL ADDRESS", label: "EMAIL ADDRESS", required: false },
+    {
+      id: "field-1",
+      type: "text",
+      placeholder: "FIRST NAME",
+      label: "FIRST NAME",
+      required: false,
+      fillColor: "transparent",
+      borderColor: "#1F2937",
+      borderWidth: "2",
+      borderRadius: "999",
+      height: "48",
+      fontFamily: "Arial",
+      fontWeight: "400",
+      fontSize: "14",
+      fontColor: "#1F2937",
+      lineHeight: "1",
+      letterSpacing: "0",
+      textAlign: "left",
+    },
+    {
+      id: "field-2",
+      type: "email",
+      placeholder: "EMAIL ADDRESS",
+      label: "EMAIL ADDRESS",
+      required: false,
+      fillColor: "transparent",
+      borderColor: "#1F2937",
+      borderWidth: "2",
+      borderRadius: "999",
+      height: "48",
+      fontFamily: "Arial",
+      fontWeight: "400",
+      fontSize: "14",
+      fontColor: "#1F2937",
+      lineHeight: "1",
+      letterSpacing: "0",
+      textAlign: "left",
+    },
   ])
+
+  const getCurrentField = () => {
+    return formFields.find((field) => field.id === selectedElementId)
+  }
+
+  const updateCurrentField = (updates: Partial<FormField>) => {
+    setFormFields(
+      formFields.map((field) => (field.id === selectedElementId ? { ...field, ...updates } : field))
+    )
+  }
 
   const handleSelectElement = (type: ElementType, id: string) => {
     setSelectedElement(type)
@@ -120,6 +180,18 @@ export default function FormBuilderPage() {
       placeholder: "NEW FIELD",
       label: "NEW FIELD",
       required: false,
+      fillColor: "transparent",
+      borderColor: "#1F2937",
+      borderWidth: "2",
+      borderRadius: "999",
+      height: "48",
+      fontFamily: "Arial",
+      fontWeight: "400",
+      fontSize: "14",
+      fontColor: "#1F2937",
+      lineHeight: "1",
+      letterSpacing: "0",
+      textAlign: "left",
     }
     setFormFields([...formFields, newField])
   }
@@ -259,12 +331,29 @@ export default function FormBuilderPage() {
                         <Plus className="h-4 w-4 text-gray-600" />
                       </button>
                       <Input
+                        type={field.type}
                         placeholder={field.placeholder}
-                        className={`cursor-pointer rounded-full border-2 bg-transparent px-6 py-6 pl-12 text-sm placeholder:text-gray-500 ${
+                        required={field.required}
+                        className={`cursor-pointer px-6 pl-12 transition-all ${
                           selectedElement === "field" && selectedElementId === field.id
-                            ? "border-blue-500"
-                            : "border-gray-800"
+                            ? "ring-4 ring-blue-500 ring-offset-2"
+                            : ""
                         }`}
+                        style={{
+                          backgroundColor: field.fillColor,
+                          borderColor: field.borderColor,
+                          borderWidth: `${field.borderWidth}px`,
+                          borderStyle: "solid",
+                          borderRadius: `${field.borderRadius}px`,
+                          height: `${field.height}px`,
+                          fontFamily: field.fontFamily,
+                          fontWeight: field.fontWeight,
+                          fontSize: `${field.fontSize}px`,
+                          color: field.fontColor,
+                          lineHeight: field.lineHeight,
+                          letterSpacing: `${field.letterSpacing}px`,
+                          textAlign: field.textAlign,
+                        }}
                         onClick={() => handleSelectElement("field", field.id)}
                       />
                     </div>
@@ -839,24 +928,55 @@ export default function FormBuilderPage() {
 
               {activeTab === "fields" && (
                 <div className="space-y-6">
-                  {/* Short Text Field */}
+                  {/* Field Type */}
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-gray-900">Short text field</label>
-                    <div className="space-y-2">
-                      <Input placeholder="FIRST NAME" className="text-sm" />
-                      <Input placeholder="FIRST NAME" className="text-sm" />
-                      <div className="flex items-center gap-2">
-                        <Checkbox id="required" />
-                        <label htmlFor="required" className="text-sm text-gray-700">
-                          Required
-                        </label>
-                      </div>
-                    </div>
+                    <label className="mb-2 block text-sm font-medium text-gray-900">Field type</label>
+                    <Select
+                      value={getCurrentField()?.type || "text"}
+                      onValueChange={(value: "text" | "email") => updateCurrentField({ type: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="text">Text</SelectItem>
+                        <SelectItem value="email">Email</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
 
-                  {/* Email Field */}
+                  {/* Label */}
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-gray-900">Email field</label>
+                    <label className="mb-2 block text-sm font-medium text-gray-900">Label</label>
+                    <Input
+                      value={getCurrentField()?.label || ""}
+                      onChange={(e) => updateCurrentField({ label: e.target.value })}
+                      placeholder="Field label"
+                      className="text-sm"
+                    />
+                  </div>
+
+                  {/* Placeholder */}
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-gray-900">Placeholder</label>
+                    <Input
+                      value={getCurrentField()?.placeholder || ""}
+                      onChange={(e) => updateCurrentField({ placeholder: e.target.value })}
+                      placeholder="Field placeholder"
+                      className="text-sm"
+                    />
+                  </div>
+
+                  {/* Required */}
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      id="required"
+                      checked={getCurrentField()?.required || false}
+                      onCheckedChange={(checked) => updateCurrentField({ required: checked as boolean })}
+                    />
+                    <label htmlFor="required" className="text-sm text-gray-700">
+                      Required field
+                    </label>
                   </div>
 
                   {/* Add Field Button */}
@@ -870,13 +990,270 @@ export default function FormBuilderPage() {
 
               {activeTab === "style" && (
                 <div className="space-y-6">
-                  <p className="text-sm text-gray-500">Style controls for fields would go here...</p>
+                  {/* Fill Color */}
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-gray-900">Fill color</label>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="text"
+                        value={getCurrentField()?.fillColor || "transparent"}
+                        onChange={(e) => updateCurrentField({ fillColor: e.target.value })}
+                        className="flex-1 text-sm"
+                      />
+                      <input
+                        type="color"
+                        value={getCurrentField()?.fillColor === "transparent" ? "#ffffff" : getCurrentField()?.fillColor}
+                        onChange={(e) => updateCurrentField({ fillColor: e.target.value })}
+                        className="h-10 w-10 shrink-0 cursor-pointer rounded-full border border-gray-300"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Border Color */}
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-gray-900">Border color</label>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="text"
+                        value={getCurrentField()?.borderColor || "#000000"}
+                        onChange={(e) => updateCurrentField({ borderColor: e.target.value })}
+                        className="flex-1 text-sm"
+                      />
+                      <input
+                        type="color"
+                        value={getCurrentField()?.borderColor || "#000000"}
+                        onChange={(e) => updateCurrentField({ borderColor: e.target.value })}
+                        className="h-10 w-10 shrink-0 cursor-pointer rounded-full border border-gray-300"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Border Width */}
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-gray-900">Border width</label>
+                    <Select
+                      value={getCurrentField()?.borderWidth || "2"}
+                      onValueChange={(value) => updateCurrentField({ borderWidth: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="0">0</SelectItem>
+                        <SelectItem value="1">1</SelectItem>
+                        <SelectItem value="2">2</SelectItem>
+                        <SelectItem value="3">3</SelectItem>
+                        <SelectItem value="4">4</SelectItem>
+                        <SelectItem value="5">5</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Border Radius */}
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-gray-900">Border radius</label>
+                    <Select
+                      value={getCurrentField()?.borderRadius || "0"}
+                      onValueChange={(value) => updateCurrentField({ borderRadius: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="0">0</SelectItem>
+                        <SelectItem value="4">4</SelectItem>
+                        <SelectItem value="8">8</SelectItem>
+                        <SelectItem value="12">12</SelectItem>
+                        <SelectItem value="16">16</SelectItem>
+                        <SelectItem value="20">20</SelectItem>
+                        <SelectItem value="999">Full</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Field Height */}
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-gray-900">Height (px)</label>
+                    <Select
+                      value={getCurrentField()?.height || "48"}
+                      onValueChange={(value) => updateCurrentField({ height: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="32">32</SelectItem>
+                        <SelectItem value="40">40</SelectItem>
+                        <SelectItem value="48">48</SelectItem>
+                        <SelectItem value="56">56</SelectItem>
+                        <SelectItem value="64">64</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               )}
 
               {activeTab === "font" && (
                 <div className="space-y-6">
-                  <p className="text-sm text-gray-500">Font controls for field text would go here...</p>
+                  {/* Font Family and Weight */}
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-gray-900">Font</label>
+                    <div className="flex gap-2">
+                      <Select
+                        value={getCurrentField()?.fontFamily || "Arial"}
+                        onValueChange={(value) => updateCurrentField({ fontFamily: value })}
+                      >
+                        <SelectTrigger className="flex-1">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Arial">Arial</SelectItem>
+                          <SelectItem value="Georgia">Georgia</SelectItem>
+                          <SelectItem value="Times New Roman">Times New Roman</SelectItem>
+                          <SelectItem value="Courier New">Courier New</SelectItem>
+                          <SelectItem value="Verdana">Verdana</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Select
+                        value={getCurrentField()?.fontWeight || "400"}
+                        onValueChange={(value) => updateCurrentField({ fontWeight: value })}
+                      >
+                        <SelectTrigger className="flex-1">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="300">Light</SelectItem>
+                          <SelectItem value="400">Regular</SelectItem>
+                          <SelectItem value="600">Semi Bold</SelectItem>
+                          <SelectItem value="700">Bold</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  {/* Font Size */}
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-gray-900">Size</label>
+                    <Select
+                      value={getCurrentField()?.fontSize || "14"}
+                      onValueChange={(value) => updateCurrentField({ fontSize: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="12">12</SelectItem>
+                        <SelectItem value="14">14</SelectItem>
+                        <SelectItem value="16">16</SelectItem>
+                        <SelectItem value="18">18</SelectItem>
+                        <SelectItem value="20">20</SelectItem>
+                        <SelectItem value="24">24</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Font Color */}
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-gray-900">Font Color</label>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="text"
+                        value={getCurrentField()?.fontColor || "#000000"}
+                        onChange={(e) => updateCurrentField({ fontColor: e.target.value })}
+                        className="flex-1 text-sm"
+                      />
+                      <input
+                        type="color"
+                        value={getCurrentField()?.fontColor || "#000000"}
+                        onChange={(e) => updateCurrentField({ fontColor: e.target.value })}
+                        className="h-10 w-10 shrink-0 cursor-pointer rounded-full border border-gray-300"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Alignment */}
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-gray-900">Alignment</label>
+                    <div className="flex gap-2">
+                      <button
+                        className={`flex h-10 flex-1 items-center justify-center rounded border ${
+                          getCurrentField()?.textAlign === "left"
+                            ? "border-blue-500 bg-blue-50"
+                            : "border-gray-300 hover:bg-gray-50"
+                        }`}
+                        onClick={() => updateCurrentField({ textAlign: "left" })}
+                      >
+                        <AlignLeft className="h-4 w-4" />
+                      </button>
+                      <button
+                        className={`flex h-10 flex-1 items-center justify-center rounded border ${
+                          getCurrentField()?.textAlign === "center"
+                            ? "border-blue-500 bg-blue-50"
+                            : "border-gray-300 hover:bg-gray-50"
+                        }`}
+                        onClick={() => updateCurrentField({ textAlign: "center" })}
+                      >
+                        <AlignCenter className="h-4 w-4" />
+                      </button>
+                      <button
+                        className={`flex h-10 flex-1 items-center justify-center rounded border ${
+                          getCurrentField()?.textAlign === "right"
+                            ? "border-blue-500 bg-blue-50"
+                            : "border-gray-300 hover:bg-gray-50"
+                        }`}
+                        onClick={() => updateCurrentField({ textAlign: "right" })}
+                      >
+                        <AlignRight className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Spacing */}
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-gray-900">Spacing</label>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="mb-1 block text-xs text-gray-600">Line height</label>
+                        <Select
+                          value={getCurrentField()?.lineHeight || "1"}
+                          onValueChange={(value) => updateCurrentField({ lineHeight: value })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="1">1</SelectItem>
+                            <SelectItem value="1.2">1.2</SelectItem>
+                            <SelectItem value="1.33">1.33</SelectItem>
+                            <SelectItem value="1.5">1.5</SelectItem>
+                            <SelectItem value="1.75">1.75</SelectItem>
+                            <SelectItem value="2">2</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <label className="mb-1 block text-xs text-gray-600">Letter spacing</label>
+                        <Select
+                          value={getCurrentField()?.letterSpacing || "0"}
+                          onValueChange={(value) => updateCurrentField({ letterSpacing: value })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="-1">-1</SelectItem>
+                            <SelectItem value="-0.5">-0.5</SelectItem>
+                            <SelectItem value="0">0</SelectItem>
+                            <SelectItem value="0.5">0.5</SelectItem>
+                            <SelectItem value="0.7">0.7</SelectItem>
+                            <SelectItem value="1">1</SelectItem>
+                            <SelectItem value="1.5">1.5</SelectItem>
+                            <SelectItem value="2">2</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
             </>
