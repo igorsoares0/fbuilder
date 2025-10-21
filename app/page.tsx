@@ -96,7 +96,7 @@ export default function FormBuilderPage() {
     url: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/text-editor-q4PVzyjDcuig9i4hLmgvReaMzJ8hhm.png",
     height: "100",
     width: "50",
-    position: "left" as "left" | "right" | "top" | "bottom",
+    position: "left" as "left" | "right" | "top" | "bottom" | "background" | "none",
   })
 
   const updateImageStyles = (updates: Partial<typeof imageStyles>) => {
@@ -223,51 +223,83 @@ export default function FormBuilderPage() {
         {/* Canvas Area */}
         <div className="flex flex-1 items-center justify-center bg-gray-50">
           <div
-            className={`flex h-full w-full max-w-6xl ${
-              imageStyles.position === "top" || imageStyles.position === "bottom"
+            className={`${
+              imageStyles.position === "background" || imageStyles.position === "none" ? "relative" : "flex"
+            } h-full w-full max-w-6xl ${
+              imageStyles.position === "top"
                 ? "flex-col"
+                : imageStyles.position === "bottom"
+                ? "flex-col-reverse"
                 : imageStyles.position === "right"
                 ? "flex-row-reverse"
+                : imageStyles.position === "background" || imageStyles.position === "none"
+                ? ""
                 : "flex-row"
             }`}
           >
             {/* Image Section */}
-            <div
-              className={`relative cursor-pointer bg-[#C9B896] ${
-                selectedElement === "image" ? "ring-4 ring-blue-500 ring-inset" : ""
-              }`}
-              style={{
-                height:
-                  imageStyles.position === "top" || imageStyles.position === "bottom"
-                    ? `${imageStyles.height}%`
-                    : "100%",
-                width:
-                  imageStyles.position === "left" || imageStyles.position === "right"
-                    ? `${imageStyles.width}%`
-                    : "100%",
-              }}
-              onClick={() => handleSelectElement("image", "main-image")}
-            >
-              <img
-                src={imageStyles.url}
-                alt="Decorative still life"
-                className="h-full w-full object-cover"
-              />
-            </div>
+            {imageStyles.position === "background" ? (
+              <div
+                className={`absolute inset-0 cursor-pointer ${
+                  selectedElement === "image" ? "ring-4 ring-blue-500 ring-inset" : ""
+                }`}
+                onClick={() => handleSelectElement("image", "main-image")}
+              >
+                <img
+                  src={imageStyles.url}
+                  alt="Decorative background"
+                  className="h-full w-full object-cover"
+                  style={{ opacity: parseInt(imageStyles.height) / 100 }}
+                />
+              </div>
+            ) : imageStyles.position === "none" ? null : (
+              <div
+                className={`relative cursor-pointer bg-[#C9B896] ${
+                  selectedElement === "image" ? "ring-4 ring-blue-500 ring-inset" : ""
+                }`}
+                style={{
+                  height:
+                    imageStyles.position === "top" || imageStyles.position === "bottom"
+                      ? `${imageStyles.height}%`
+                      : "100%",
+                  width:
+                    imageStyles.position === "left" || imageStyles.position === "right"
+                      ? `${imageStyles.width}%`
+                      : "100%",
+                }}
+                onClick={() => handleSelectElement("image", "main-image")}
+              >
+                <img
+                  src={imageStyles.url}
+                  alt="Decorative still life"
+                  className="h-full w-full object-cover"
+                />
+              </div>
+            )}
 
             {/* Form Section */}
             <div
-              className="flex flex-1 items-center justify-center bg-[#EDE8E3] px-16 py-20"
-              style={{
-                height:
-                  imageStyles.position === "top" || imageStyles.position === "bottom"
-                    ? `${100 - parseInt(imageStyles.height)}%`
-                    : "100%",
-                width:
-                  imageStyles.position === "left" || imageStyles.position === "right"
-                    ? `${100 - parseInt(imageStyles.width)}%`
-                    : "100%",
-              }}
+              className={`flex items-center justify-center px-16 py-20 ${
+                imageStyles.position === "background"
+                  ? "relative z-10 h-full w-full"
+                  : imageStyles.position === "none"
+                  ? "relative h-full w-full bg-[#EDE8E3]"
+                  : "flex-1 bg-[#EDE8E3]"
+              }`}
+              style={
+                imageStyles.position === "background" || imageStyles.position === "none"
+                  ? {}
+                  : {
+                      height:
+                        imageStyles.position === "top" || imageStyles.position === "bottom"
+                          ? `${100 - parseInt(imageStyles.height)}%`
+                          : "100%",
+                      width:
+                        imageStyles.position === "left" || imageStyles.position === "right"
+                          ? `${100 - parseInt(imageStyles.width)}%`
+                          : "100%",
+                    }
+              }
             >
               <div className="w-full max-w-md space-y-6">
                 {/* Heading */}
@@ -1287,23 +1319,28 @@ export default function FormBuilderPage() {
                 </div>
 
                 {/* Image Sizing */}
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-gray-900">Image sizing</label>
-                  <div className="space-y-3">
-                    <div>
-                      <label className="mb-1 block text-xs text-gray-600">
-                        {imageStyles.position === "top" || imageStyles.position === "bottom"
-                          ? "Height (%)"
-                          : "Width (%)"}
-                      </label>
+                {imageStyles.position !== "none" && (
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-gray-900">
+                      {imageStyles.position === "background" ? "Background opacity" : "Image sizing"}
+                    </label>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="mb-1 block text-xs text-gray-600">
+                          {imageStyles.position === "background"
+                            ? "Opacity (%)"
+                            : imageStyles.position === "top" || imageStyles.position === "bottom"
+                            ? "Height (%)"
+                            : "Width (%)"}
+                        </label>
                       <Select
                         value={
-                          imageStyles.position === "top" || imageStyles.position === "bottom"
+                          imageStyles.position === "background" || imageStyles.position === "top" || imageStyles.position === "bottom"
                             ? imageStyles.height
                             : imageStyles.width
                         }
                         onValueChange={(value) =>
-                          imageStyles.position === "top" || imageStyles.position === "bottom"
+                          imageStyles.position === "background" || imageStyles.position === "top" || imageStyles.position === "bottom"
                             ? updateImageStyles({ height: value })
                             : updateImageStyles({ width: value })
                         }
@@ -1312,26 +1349,44 @@ export default function FormBuilderPage() {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="25">25%</SelectItem>
-                          <SelectItem value="30">30%</SelectItem>
-                          <SelectItem value="40">40%</SelectItem>
-                          <SelectItem value="50">50%</SelectItem>
-                          <SelectItem value="60">60%</SelectItem>
-                          <SelectItem value="70">70%</SelectItem>
-                          <SelectItem value="75">75%</SelectItem>
-                          <SelectItem value="100">100%</SelectItem>
+                          {imageStyles.position === "background" ? (
+                            <>
+                              <SelectItem value="10">10%</SelectItem>
+                              <SelectItem value="20">20%</SelectItem>
+                              <SelectItem value="30">30%</SelectItem>
+                              <SelectItem value="40">40%</SelectItem>
+                              <SelectItem value="50">50%</SelectItem>
+                              <SelectItem value="60">60%</SelectItem>
+                              <SelectItem value="70">70%</SelectItem>
+                              <SelectItem value="80">80%</SelectItem>
+                              <SelectItem value="90">90%</SelectItem>
+                              <SelectItem value="100">100%</SelectItem>
+                            </>
+                          ) : (
+                            <>
+                              <SelectItem value="25">25%</SelectItem>
+                              <SelectItem value="30">30%</SelectItem>
+                              <SelectItem value="40">40%</SelectItem>
+                              <SelectItem value="50">50%</SelectItem>
+                              <SelectItem value="60">60%</SelectItem>
+                              <SelectItem value="70">70%</SelectItem>
+                              <SelectItem value="75">75%</SelectItem>
+                              <SelectItem value="100">100%</SelectItem>
+                            </>
+                          )}
                         </SelectContent>
                       </Select>
                     </div>
                   </div>
                 </div>
+                )}
 
                 {/* Image Position */}
                 <div>
                   <label className="mb-2 block text-sm font-medium text-gray-900">Image position</label>
                   <Select
                     value={imageStyles.position}
-                    onValueChange={(value: "left" | "right" | "top" | "bottom") =>
+                    onValueChange={(value: "left" | "right" | "top" | "bottom" | "background" | "none") =>
                       updateImageStyles({ position: value })
                     }
                   >
@@ -1343,6 +1398,8 @@ export default function FormBuilderPage() {
                       <SelectItem value="right">Right</SelectItem>
                       <SelectItem value="top">Top</SelectItem>
                       <SelectItem value="bottom">Bottom</SelectItem>
+                      <SelectItem value="background">Background</SelectItem>
+                      <SelectItem value="none">No Image</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
