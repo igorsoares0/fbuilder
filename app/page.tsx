@@ -559,14 +559,19 @@ export default function FormBuilderPage() {
                           <textarea
                             autoFocus
                             value={element.content}
-                            onChange={(e) => updateCurrentElement({ content: e.target.value })}
+                            onChange={(e) => {
+                              updateCurrentElement({ content: e.target.value })
+                              // Auto-resize textarea
+                              e.target.style.height = 'auto'
+                              e.target.style.height = e.target.scrollHeight + 'px'
+                            }}
                             onBlur={handleFinishEditing}
                             onKeyDown={(e) => {
                               if (e.key === "Escape") {
                                 handleFinishEditing()
                               }
                             }}
-                            className="w-full resize-none border-none bg-transparent outline-none"
+                            className="w-full resize-none border-none bg-transparent outline-none overflow-hidden"
                             style={{
                               fontFamily: element.fontFamily,
                               fontWeight: element.fontWeight,
@@ -575,9 +580,14 @@ export default function FormBuilderPage() {
                               lineHeight: element.lineHeight,
                               letterSpacing: `${element.letterSpacing}px`,
                               textAlign: element.textAlign,
-                              minHeight: "1.5em",
+                              height: 'auto',
                             }}
-                            rows={element.content.split("\n").length}
+                            ref={(textarea) => {
+                              if (textarea) {
+                                textarea.style.height = 'auto'
+                                textarea.style.height = textarea.scrollHeight + 'px'
+                              }
+                            }}
                           />
                         ) : (
                           <p
@@ -589,6 +599,8 @@ export default function FormBuilderPage() {
                               lineHeight: element.lineHeight,
                               letterSpacing: `${element.letterSpacing}px`,
                               textAlign: element.textAlign,
+                              whiteSpace: 'pre-wrap',
+                              wordBreak: 'break-word',
                             }}
                           >
                             {element.content}
