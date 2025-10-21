@@ -5,9 +5,65 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Monitor, Smartphone, AlignLeft, AlignCenter, AlignRight, Upload, Plus } from "lucide-react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Monitor, Smartphone, AlignLeft, AlignCenter, AlignRight, Upload, Plus, Type, MousePointer, Image as ImageIcon } from "lucide-react"
 
 type ElementType = "text" | "button" | "field" | "image" | null
+
+interface TextElement {
+  id: string
+  elementType: "text"
+  content: string
+  fontFamily: string
+  fontWeight: string
+  fontSize: string
+  fontColor: string
+  lineHeight: string
+  letterSpacing: string
+  textAlign: "left" | "center" | "right"
+}
+
+interface ButtonElement {
+  id: string
+  elementType: "button"
+  label: string
+  fillColor: string
+  borderColor: string
+  borderWidth: string
+  borderRadius: string
+  height: string
+  width: string
+  fontFamily: string
+  fontWeight: string
+  fontSize: string
+  fontColor: string
+  lineHeight: string
+  letterSpacing: string
+  textAlign: "left" | "center" | "right"
+}
+
+interface FieldElement {
+  id: string
+  elementType: "field"
+  type: "text" | "email"
+  placeholder: string
+  label: string
+  required: boolean
+  fillColor: string
+  borderColor: string
+  borderWidth: string
+  borderRadius: string
+  height: string
+  fontFamily: string
+  fontWeight: string
+  fontSize: string
+  fontColor: string
+  lineHeight: string
+  letterSpacing: string
+  textAlign: "left" | "center" | "right"
+}
+
+type FormElement = TextElement | ButtonElement | FieldElement
 
 interface FormField {
   id: string
@@ -35,6 +91,93 @@ export default function FormBuilderPage() {
   const [selectedElement, setSelectedElement] = useState<ElementType>("text")
   const [selectedElementId, setSelectedElementId] = useState<string>("heading")
   const [activeTab, setActiveTab] = useState<"fields" | "style" | "font">("font")
+  const [showAddMenu, setShowAddMenu] = useState(false)
+  const [addMenuPosition, setAddMenuPosition] = useState<number | null>(null)
+  const [editingElementId, setEditingElementId] = useState<string | null>(null)
+  const [formElements, setFormElements] = useState<FormElement[]>([
+    {
+      id: "heading",
+      elementType: "text",
+      content: "Unleash your genius",
+      fontFamily: "Georgia",
+      fontWeight: "400",
+      fontSize: "48",
+      fontColor: "#494D3E",
+      lineHeight: "1.2",
+      letterSpacing: "0",
+      textAlign: "left",
+    },
+    {
+      id: "description",
+      elementType: "text",
+      content: "Wondering how to take your creative talent and turn it into a scalable business? You're in good hands, friend. Sign up below to receive my 100% free step-by-step guide on how to launch and grow a creative business that celebrates your genius.",
+      fontFamily: "Arial",
+      fontWeight: "400",
+      fontSize: "14",
+      fontColor: "#6B7280",
+      lineHeight: "1.5",
+      letterSpacing: "0",
+      textAlign: "left",
+    },
+    {
+      id: "field-1",
+      elementType: "field",
+      type: "text",
+      placeholder: "FIRST NAME",
+      label: "FIRST NAME",
+      required: false,
+      fillColor: "transparent",
+      borderColor: "#1F2937",
+      borderWidth: "2",
+      borderRadius: "999",
+      height: "48",
+      fontFamily: "Arial",
+      fontWeight: "400",
+      fontSize: "14",
+      fontColor: "#1F2937",
+      lineHeight: "1",
+      letterSpacing: "0",
+      textAlign: "left",
+    },
+    {
+      id: "field-2",
+      elementType: "field",
+      type: "email",
+      placeholder: "EMAIL ADDRESS",
+      label: "EMAIL ADDRESS",
+      required: false,
+      fillColor: "transparent",
+      borderColor: "#1F2937",
+      borderWidth: "2",
+      borderRadius: "999",
+      height: "48",
+      fontFamily: "Arial",
+      fontWeight: "400",
+      fontSize: "14",
+      fontColor: "#1F2937",
+      lineHeight: "1",
+      letterSpacing: "0",
+      textAlign: "left",
+    },
+    {
+      id: "download-button",
+      elementType: "button",
+      label: "DOWNLOAD",
+      fillColor: "#494D3E",
+      borderColor: "transparent",
+      borderWidth: "0",
+      borderRadius: "999",
+      height: "48",
+      width: "100",
+      fontFamily: "Arial",
+      fontWeight: "500",
+      fontSize: "14",
+      fontColor: "#FFFFFF",
+      lineHeight: "1",
+      letterSpacing: "1",
+      textAlign: "center",
+    },
+  ])
 
   // Text properties - separate states for heading and description
   const [headingStyles, setHeadingStyles] = useState({
@@ -155,6 +298,16 @@ export default function FormBuilderPage() {
     },
   ])
 
+  const getCurrentElement = () => {
+    return formElements.find((el) => el.id === selectedElementId)
+  }
+
+  const updateCurrentElement = (updates: Partial<FormElement>) => {
+    setFormElements(
+      formElements.map((el) => (el.id === selectedElementId ? { ...el, ...updates } as FormElement : el))
+    )
+  }
+
   const getCurrentField = () => {
     return formFields.find((field) => field.id === selectedElementId)
   }
@@ -166,8 +319,15 @@ export default function FormBuilderPage() {
   }
 
   const handleSelectElement = (type: ElementType, id: string) => {
+    // Se já está selecionado, entra em modo de edição
+    if (selectedElementId === id && (type === "text" || type === "button")) {
+      setEditingElementId(id)
+      return
+    }
+
     setSelectedElement(type)
     setSelectedElementId(id)
+    setEditingElementId(null)
     if (type === "text") setActiveTab("font")
     if (type === "button") setActiveTab("style")
     if (type === "field") setActiveTab("fields")
@@ -194,6 +354,87 @@ export default function FormBuilderPage() {
       textAlign: "left",
     }
     setFormFields([...formFields, newField])
+  }
+
+  const handleOpenAddMenu = (afterIndex: number) => {
+    setAddMenuPosition(afterIndex)
+    setShowAddMenu(true)
+  }
+
+  const handleCloseAddMenu = () => {
+    setShowAddMenu(false)
+    setAddMenuPosition(null)
+  }
+
+  const handleAddElement = (type: "text" | "button" | "field") => {
+    if (addMenuPosition === null) return
+
+    const newId = `${type}-${Date.now()}`
+    let newElement: FormElement
+
+    if (type === "text") {
+      newElement = {
+        id: newId,
+        elementType: "text",
+        content: "New text element",
+        fontFamily: "Arial",
+        fontWeight: "400",
+        fontSize: "16",
+        fontColor: "#000000",
+        lineHeight: "1.5",
+        letterSpacing: "0",
+        textAlign: "left",
+      }
+    } else if (type === "button") {
+      newElement = {
+        id: newId,
+        elementType: "button",
+        label: "CLICK ME",
+        fillColor: "#000000",
+        borderColor: "transparent",
+        borderWidth: "0",
+        borderRadius: "8",
+        height: "48",
+        width: "100",
+        fontFamily: "Arial",
+        fontWeight: "500",
+        fontSize: "14",
+        fontColor: "#FFFFFF",
+        lineHeight: "1",
+        letterSpacing: "0",
+        textAlign: "center",
+      }
+    } else {
+      newElement = {
+        id: newId,
+        elementType: "field",
+        type: "text",
+        placeholder: "NEW FIELD",
+        label: "NEW FIELD",
+        required: false,
+        fillColor: "transparent",
+        borderColor: "#1F2937",
+        borderWidth: "2",
+        borderRadius: "8",
+        height: "48",
+        fontFamily: "Arial",
+        fontWeight: "400",
+        fontSize: "14",
+        fontColor: "#1F2937",
+        lineHeight: "1",
+        letterSpacing: "0",
+        textAlign: "left",
+      }
+    }
+
+    const newElements = [...formElements]
+    newElements.splice(addMenuPosition + 1, 0, newElement)
+    setFormElements(newElements)
+    handleCloseAddMenu()
+  }
+
+  const handleFinishEditing = () => {
+    setEditingElementId(null)
   }
 
   return (
@@ -302,120 +543,153 @@ export default function FormBuilderPage() {
               }
             >
               <div className="w-full max-w-md space-y-6">
-                {/* Heading */}
-                <div
-                  className={`cursor-pointer rounded border-2 p-4 ${
-                    selectedElement === "text" && selectedElementId === "heading"
-                      ? "border-blue-500"
-                      : "border-transparent"
-                  }`}
-                  onClick={() => handleSelectElement("text", "heading")}
-                >
-                  <h1
-                    style={{
-                      fontFamily: headingStyles.fontFamily,
-                      fontWeight: headingStyles.fontWeight,
-                      fontSize: `${headingStyles.fontSize}px`,
-                      color: headingStyles.fontColor,
-                      lineHeight: headingStyles.lineHeight,
-                      letterSpacing: `${headingStyles.letterSpacing}px`,
-                      textAlign: headingStyles.textAlign,
-                    }}
-                  >
-                    Unleash your genius
-                  </h1>
-                </div>
-
-                {/* Description */}
-                <div
-                  className={`cursor-pointer rounded border-2 p-2 ${
-                    selectedElement === "text" && selectedElementId === "description"
-                      ? "border-blue-500"
-                      : "border-transparent"
-                  }`}
-                  onClick={() => handleSelectElement("text", "description")}
-                >
-                  <p
-                    style={{
-                      fontFamily: descriptionStyles.fontFamily,
-                      fontWeight: descriptionStyles.fontWeight,
-                      fontSize: `${descriptionStyles.fontSize}px`,
-                      color: descriptionStyles.fontColor,
-                      lineHeight: descriptionStyles.lineHeight,
-                      letterSpacing: `${descriptionStyles.letterSpacing}px`,
-                      textAlign: descriptionStyles.textAlign,
-                    }}
-                  >
-                    Wondering how to take your creative talent and turn it into a scalable business? You're in good
-                    hands, friend. Sign up below to receive my 100% free step-by-step guide on how to launch and grow a
-                    creative business that celebrates your genius.
-                  </p>
-                </div>
-
-                {/* Form Fields */}
-                <div className="space-y-4 pt-4">
-                  {formFields.map((field, index) => (
-                    <div key={field.id} className="group relative">
-                      <button
-                        className="absolute left-0 top-1/2 z-10 -translate-x-10 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full border border-gray-400 bg-white hover:bg-gray-100 transition-all opacity-0 group-hover:opacity-100"
-                        onClick={() => handleAddField()}
-                        title="Add new field"
+                {formElements.map((element, index) => (
+                  <div key={element.id} className="group relative">
+                    {/* Render based on element type */}
+                    {element.elementType === "text" && (
+                      <div
+                        className={`cursor-pointer rounded border-2 p-4 ${
+                          selectedElement === "text" && selectedElementId === element.id
+                            ? "border-blue-500"
+                            : "border-transparent"
+                        }`}
+                        onClick={() => handleSelectElement("text", element.id)}
                       >
-                        <Plus className="h-4 w-4 text-gray-600" />
-                      </button>
+                        {editingElementId === element.id ? (
+                          <textarea
+                            autoFocus
+                            value={element.content}
+                            onChange={(e) => updateCurrentElement({ content: e.target.value })}
+                            onBlur={handleFinishEditing}
+                            onKeyDown={(e) => {
+                              if (e.key === "Escape") {
+                                handleFinishEditing()
+                              }
+                            }}
+                            className="w-full resize-none border-none bg-transparent outline-none"
+                            style={{
+                              fontFamily: element.fontFamily,
+                              fontWeight: element.fontWeight,
+                              fontSize: `${element.fontSize}px`,
+                              color: element.fontColor,
+                              lineHeight: element.lineHeight,
+                              letterSpacing: `${element.letterSpacing}px`,
+                              textAlign: element.textAlign,
+                              minHeight: "1.5em",
+                            }}
+                            rows={element.content.split("\n").length}
+                          />
+                        ) : (
+                          <p
+                            style={{
+                              fontFamily: element.fontFamily,
+                              fontWeight: element.fontWeight,
+                              fontSize: `${element.fontSize}px`,
+                              color: element.fontColor,
+                              lineHeight: element.lineHeight,
+                              letterSpacing: `${element.letterSpacing}px`,
+                              textAlign: element.textAlign,
+                            }}
+                          >
+                            {element.content}
+                          </p>
+                        )}
+                      </div>
+                    )}
+
+                    {element.elementType === "field" && (
                       <Input
-                        type={field.type}
-                        placeholder={field.placeholder}
-                        required={field.required}
+                        type={element.type}
+                        placeholder={element.placeholder}
+                        required={element.required}
                         className={`w-full cursor-pointer px-6 transition-all ${
-                          selectedElement === "field" && selectedElementId === field.id
+                          selectedElement === "field" && selectedElementId === element.id
                             ? "ring-4 ring-blue-500 ring-offset-2"
                             : ""
                         }`}
                         style={{
-                          backgroundColor: field.fillColor,
-                          borderColor: field.borderColor,
-                          borderWidth: `${field.borderWidth}px`,
+                          backgroundColor: element.fillColor,
+                          borderColor: element.borderColor,
+                          borderWidth: `${element.borderWidth}px`,
                           borderStyle: "solid",
-                          borderRadius: `${field.borderRadius}px`,
-                          height: `${field.height}px`,
-                          fontFamily: field.fontFamily,
-                          fontWeight: field.fontWeight,
-                          fontSize: `${field.fontSize}px`,
-                          color: field.fontColor,
-                          lineHeight: field.lineHeight,
-                          letterSpacing: `${field.letterSpacing}px`,
-                          textAlign: field.textAlign,
+                          borderRadius: `${element.borderRadius}px`,
+                          height: `${element.height}px`,
+                          fontFamily: element.fontFamily,
+                          fontWeight: element.fontWeight,
+                          fontSize: `${element.fontSize}px`,
+                          color: element.fontColor,
+                          lineHeight: element.lineHeight,
+                          letterSpacing: `${element.letterSpacing}px`,
+                          textAlign: element.textAlign,
                         }}
-                        onClick={() => handleSelectElement("field", field.id)}
+                        onClick={() => handleSelectElement("field", element.id)}
                       />
-                    </div>
-                  ))}
-                  <Button
-                    className={`transition-all ${
-                      selectedElement === "button" ? "ring-4 ring-blue-500 ring-offset-2" : ""
-                    }`}
-                    style={{
-                      backgroundColor: buttonStyles.fillColor,
-                      borderColor: buttonStyles.borderColor,
-                      borderWidth: `${buttonStyles.borderWidth}px`,
-                      borderStyle: buttonStyles.borderWidth !== "0" ? "solid" : "none",
-                      borderRadius: `${buttonStyles.borderRadius}px`,
-                      height: `${buttonStyles.height}px`,
-                      width: `${buttonStyles.width}%`,
-                      fontFamily: buttonStyles.fontFamily,
-                      fontWeight: buttonStyles.fontWeight,
-                      fontSize: `${buttonStyles.fontSize}px`,
-                      color: buttonStyles.fontColor,
-                      lineHeight: buttonStyles.lineHeight,
-                      letterSpacing: `${buttonStyles.letterSpacing}px`,
-                      textAlign: buttonStyles.textAlign,
-                    }}
-                    onClick={() => handleSelectElement("button", "download-button")}
-                  >
-                    DOWNLOAD
-                  </Button>
-                </div>
+                    )}
+
+                    {element.elementType === "button" && (
+                      <Button
+                        className={`transition-all relative ${
+                          selectedElement === "button" && selectedElementId === element.id
+                            ? "ring-4 ring-blue-500 ring-offset-2"
+                            : ""
+                        }`}
+                        style={{
+                          backgroundColor: element.fillColor,
+                          borderColor: element.borderColor,
+                          borderWidth: `${element.borderWidth}px`,
+                          borderStyle: element.borderWidth !== "0" ? "solid" : "none",
+                          borderRadius: `${element.borderRadius}px`,
+                          height: `${element.height}px`,
+                          width: `${element.width}%`,
+                          fontFamily: element.fontFamily,
+                          fontWeight: element.fontWeight,
+                          fontSize: `${element.fontSize}px`,
+                          color: element.fontColor,
+                          lineHeight: element.lineHeight,
+                          letterSpacing: `${element.letterSpacing}px`,
+                          textAlign: element.textAlign,
+                        }}
+                        onClick={() => handleSelectElement("button", element.id)}
+                      >
+                        {editingElementId === element.id ? (
+                          <input
+                            autoFocus
+                            value={element.label}
+                            onChange={(e) => updateCurrentElement({ label: e.target.value })}
+                            onBlur={handleFinishEditing}
+                            onKeyDown={(e) => {
+                              if (e.key === "Escape") {
+                                handleFinishEditing()
+                              }
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                            className="w-full border-none bg-transparent text-center outline-none"
+                            style={{
+                              fontFamily: element.fontFamily,
+                              fontWeight: element.fontWeight,
+                              fontSize: `${element.fontSize}px`,
+                              color: element.fontColor,
+                              lineHeight: element.lineHeight,
+                              letterSpacing: `${element.letterSpacing}px`,
+                              textAlign: element.textAlign,
+                            }}
+                          />
+                        ) : (
+                          element.label
+                        )}
+                      </Button>
+                    )}
+
+                    {/* Add button below each element */}
+                    <button
+                      className="absolute left-1/2 -bottom-3 -translate-x-1/2 flex h-6 w-6 items-center justify-center rounded-full border border-gray-300 bg-white hover:bg-gray-100 transition-all opacity-0 group-hover:opacity-100 shadow-sm z-10"
+                      onClick={() => handleOpenAddMenu(index)}
+                      title="Add element"
+                    >
+                      <Plus className="h-3 w-3 text-gray-600" />
+                    </button>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
@@ -424,7 +698,7 @@ export default function FormBuilderPage() {
         {/* Right Sidebar - Properties Panel */}
         <div className="w-80 border-l border-gray-200 bg-white p-6">
           {/* Text Editor Panel */}
-          {selectedElement === "text" && (
+          {selectedElement === "text" && getCurrentElement()?.elementType === "text" && (
             <>
               <h2 className="mb-8 text-lg font-semibold">Font</h2>
 
@@ -434,8 +708,8 @@ export default function FormBuilderPage() {
                   <label className="mb-2 block text-sm font-medium text-gray-900">Font</label>
                   <div className="flex gap-2">
                     <Select
-                      value={getCurrentTextStyles().fontFamily}
-                      onValueChange={(value) => updateCurrentTextStyles({ fontFamily: value })}
+                      value={(getCurrentElement() as TextElement)?.fontFamily || "Arial"}
+                      onValueChange={(value) => updateCurrentElement({ fontFamily: value })}
                     >
                       <SelectTrigger className="flex-1">
                         <SelectValue />
@@ -449,8 +723,8 @@ export default function FormBuilderPage() {
                       </SelectContent>
                     </Select>
                     <Select
-                      value={getCurrentTextStyles().fontWeight}
-                      onValueChange={(value) => updateCurrentTextStyles({ fontWeight: value })}
+                      value={((getCurrentElement() as TextElement) || {fontFamily:"Arial",fontWeight:"400",fontSize:"16",fontColor:"#000000",lineHeight:"1.5",letterSpacing:"0",textAlign:"left" as const}).fontWeight}
+                      onValueChange={(value) => updateCurrentElement({ fontWeight: value })}
                     >
                       <SelectTrigger className="flex-1">
                         <SelectValue />
@@ -469,8 +743,8 @@ export default function FormBuilderPage() {
                 <div>
                   <label className="mb-2 block text-sm font-medium text-gray-900">Size</label>
                   <Select
-                    value={getCurrentTextStyles().fontSize}
-                    onValueChange={(value) => updateCurrentTextStyles({ fontSize: value })}
+                    value={((getCurrentElement() as TextElement) || {fontFamily:"Arial",fontWeight:"400",fontSize:"16",fontColor:"#000000",lineHeight:"1.5",letterSpacing:"0",textAlign:"left" as const}).fontSize}
+                    onValueChange={(value) => updateCurrentElement({ fontSize: value })}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -498,14 +772,14 @@ export default function FormBuilderPage() {
                   <div className="flex items-center gap-2">
                     <Input
                       type="text"
-                      value={getCurrentTextStyles().fontColor}
-                      onChange={(e) => updateCurrentTextStyles({ fontColor: e.target.value })}
+                      value={((getCurrentElement() as TextElement) || {fontFamily:"Arial",fontWeight:"400",fontSize:"16",fontColor:"#000000",lineHeight:"1.5",letterSpacing:"0",textAlign:"left" as const}).fontColor}
+                      onChange={(e) => updateCurrentElement({ fontColor: e.target.value })}
                       className="flex-1 text-sm"
                     />
                     <input
                       type="color"
-                      value={getCurrentTextStyles().fontColor}
-                      onChange={(e) => updateCurrentTextStyles({ fontColor: e.target.value })}
+                      value={((getCurrentElement() as TextElement) || {fontFamily:"Arial",fontWeight:"400",fontSize:"16",fontColor:"#000000",lineHeight:"1.5",letterSpacing:"0",textAlign:"left" as const}).fontColor}
+                      onChange={(e) => updateCurrentElement({ fontColor: e.target.value })}
                       className="h-10 w-10 shrink-0 cursor-pointer rounded-full border border-gray-300"
                     />
                   </div>
@@ -517,31 +791,31 @@ export default function FormBuilderPage() {
                   <div className="flex gap-2">
                     <button
                       className={`flex h-10 flex-1 items-center justify-center rounded border ${
-                        getCurrentTextStyles().textAlign === "left"
+                        ((getCurrentElement() as TextElement) || {fontFamily:"Arial",fontWeight:"400",fontSize:"16",fontColor:"#000000",lineHeight:"1.5",letterSpacing:"0",textAlign:"left" as const}).textAlign === "left"
                           ? "border-blue-500 bg-blue-50"
                           : "border-gray-300 hover:bg-gray-50"
                       }`}
-                      onClick={() => updateCurrentTextStyles({ textAlign: "left" })}
+                      onClick={() => updateCurrentElement({ textAlign: "left" })}
                     >
                       <AlignLeft className="h-4 w-4" />
                     </button>
                     <button
                       className={`flex h-10 flex-1 items-center justify-center rounded border ${
-                        getCurrentTextStyles().textAlign === "center"
+                        ((getCurrentElement() as TextElement) || {fontFamily:"Arial",fontWeight:"400",fontSize:"16",fontColor:"#000000",lineHeight:"1.5",letterSpacing:"0",textAlign:"left" as const}).textAlign === "center"
                           ? "border-blue-500 bg-blue-50"
                           : "border-gray-300 hover:bg-gray-50"
                       }`}
-                      onClick={() => updateCurrentTextStyles({ textAlign: "center" })}
+                      onClick={() => updateCurrentElement({ textAlign: "center" })}
                     >
                       <AlignCenter className="h-4 w-4" />
                     </button>
                     <button
                       className={`flex h-10 flex-1 items-center justify-center rounded border ${
-                        getCurrentTextStyles().textAlign === "right"
+                        ((getCurrentElement() as TextElement) || {fontFamily:"Arial",fontWeight:"400",fontSize:"16",fontColor:"#000000",lineHeight:"1.5",letterSpacing:"0",textAlign:"left" as const}).textAlign === "right"
                           ? "border-blue-500 bg-blue-50"
                           : "border-gray-300 hover:bg-gray-50"
                       }`}
-                      onClick={() => updateCurrentTextStyles({ textAlign: "right" })}
+                      onClick={() => updateCurrentElement({ textAlign: "right" })}
                     >
                       <AlignRight className="h-4 w-4" />
                     </button>
@@ -555,8 +829,8 @@ export default function FormBuilderPage() {
                     <div>
                       <label className="mb-1 block text-xs text-gray-600">Line height</label>
                       <Select
-                        value={getCurrentTextStyles().lineHeight}
-                        onValueChange={(value) => updateCurrentTextStyles({ lineHeight: value })}
+                        value={((getCurrentElement() as TextElement) || {fontFamily:"Arial",fontWeight:"400",fontSize:"16",fontColor:"#000000",lineHeight:"1.5",letterSpacing:"0",textAlign:"left" as const}).lineHeight}
+                        onValueChange={(value) => updateCurrentElement({ lineHeight: value })}
                       >
                         <SelectTrigger>
                           <SelectValue />
@@ -574,8 +848,8 @@ export default function FormBuilderPage() {
                     <div>
                       <label className="mb-1 block text-xs text-gray-600">Letter spacing</label>
                       <Select
-                        value={getCurrentTextStyles().letterSpacing}
-                        onValueChange={(value) => updateCurrentTextStyles({ letterSpacing: value })}
+                        value={((getCurrentElement() as TextElement) || {fontFamily:"Arial",fontWeight:"400",fontSize:"16",fontColor:"#000000",lineHeight:"1.5",letterSpacing:"0",textAlign:"left" as const}).letterSpacing}
+                        onValueChange={(value) => updateCurrentElement({ letterSpacing: value })}
                       >
                         <SelectTrigger>
                           <SelectValue />
@@ -1409,6 +1683,53 @@ export default function FormBuilderPage() {
           )}
         </div>
       </div>
+
+      {/* Add Element Dialog */}
+      <Dialog open={showAddMenu} onOpenChange={setShowAddMenu}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add Element</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-3 py-4">
+            <button
+              onClick={() => handleAddElement("text")}
+              className="flex items-center gap-3 rounded-lg border border-gray-200 p-4 hover:bg-gray-50 transition-colors text-left"
+            >
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100">
+                <Type className="h-5 w-5 text-blue-600" />
+              </div>
+              <div>
+                <div className="font-medium">Text</div>
+                <div className="text-sm text-gray-500">Add a text element</div>
+              </div>
+            </button>
+            <button
+              onClick={() => handleAddElement("button")}
+              className="flex items-center gap-3 rounded-lg border border-gray-200 p-4 hover:bg-gray-50 transition-colors text-left"
+            >
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100">
+                <MousePointer className="h-5 w-5 text-green-600" />
+              </div>
+              <div>
+                <div className="font-medium">Button</div>
+                <div className="text-sm text-gray-500">Add a button element</div>
+              </div>
+            </button>
+            <button
+              onClick={() => handleAddElement("field")}
+              className="flex items-center gap-3 rounded-lg border border-gray-200 p-4 hover:bg-gray-50 transition-colors text-left"
+            >
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-100">
+                <ImageIcon className="h-5 w-5 text-purple-600" />
+              </div>
+              <div>
+                <div className="font-medium">Field</div>
+                <div className="text-sm text-gray-500">Add an input field</div>
+              </div>
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
