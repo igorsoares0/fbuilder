@@ -355,10 +355,11 @@ export default function FormBuilderPage() {
                 {/* Form Fields */}
                 <div className="space-y-4 pt-4">
                   {formFields.map((field, index) => (
-                    <div key={field.id} className="relative">
+                    <div key={field.id} className="group relative">
                       <button
-                        className="absolute left-3 top-1/2 z-10 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full border border-gray-400 bg-white hover:bg-gray-50"
+                        className="absolute left-0 top-1/2 z-10 -translate-x-10 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full border border-gray-400 bg-white hover:bg-gray-100 transition-all opacity-0 group-hover:opacity-100"
                         onClick={() => handleAddField()}
+                        title="Add new field"
                       >
                         <Plus className="h-4 w-4 text-gray-600" />
                       </button>
@@ -366,7 +367,7 @@ export default function FormBuilderPage() {
                         type={field.type}
                         placeholder={field.placeholder}
                         required={field.required}
-                        className={`cursor-pointer px-6 pl-12 transition-all ${
+                        className={`w-full cursor-pointer px-6 transition-all ${
                           selectedElement === "field" && selectedElementId === field.id
                             ? "ring-4 ring-blue-500 ring-offset-2"
                             : ""
