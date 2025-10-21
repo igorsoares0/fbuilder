@@ -880,7 +880,7 @@ export default function FormBuilderPage() {
           )}
 
           {/* Button Editor Panel */}
-          {selectedElement === "button" && (
+          {selectedElement === "button" && getCurrentElement()?.elementType === "button" && (
             <>
               <div className="mb-6 flex gap-4 border-b border-gray-200">
                 <button
@@ -909,14 +909,14 @@ export default function FormBuilderPage() {
                     <div className="flex items-center gap-2">
                       <Input
                         type="text"
-                        value={buttonStyles.fillColor}
-                        onChange={(e) => updateButtonStyles({ fillColor: e.target.value })}
+                        value={(getCurrentElement() as ButtonElement)?.fillColor || "#000000"}
+                        onChange={(e) => updateCurrentElement({ fillColor: e.target.value })}
                         className="flex-1 text-sm"
                       />
                       <input
                         type="color"
-                        value={buttonStyles.fillColor}
-                        onChange={(e) => updateButtonStyles({ fillColor: e.target.value })}
+                        value={(getCurrentElement() as ButtonElement)?.fillColor || "#000000"}
+                        onChange={(e) => updateCurrentElement({ fillColor: e.target.value })}
                         className="h-10 w-10 shrink-0 cursor-pointer rounded-full border border-gray-300"
                       />
                     </div>
@@ -928,14 +928,14 @@ export default function FormBuilderPage() {
                     <div className="flex items-center gap-2">
                       <Input
                         type="text"
-                        value={buttonStyles.borderColor}
-                        onChange={(e) => updateButtonStyles({ borderColor: e.target.value })}
+                        value={(getCurrentElement() as ButtonElement)?.borderColor || "#000000"}
+                        onChange={(e) => updateCurrentElement({ borderColor: e.target.value })}
                         className="flex-1 text-sm"
                       />
                       <input
                         type="color"
-                        value={buttonStyles.borderColor}
-                        onChange={(e) => updateButtonStyles({ borderColor: e.target.value })}
+                        value={(getCurrentElement() as ButtonElement)?.borderColor || "#000000"}
+                        onChange={(e) => updateCurrentElement({ borderColor: e.target.value })}
                         className="h-10 w-10 shrink-0 cursor-pointer rounded-full border border-gray-300"
                       />
                     </div>
@@ -945,8 +945,8 @@ export default function FormBuilderPage() {
                   <div>
                     <label className="mb-2 block text-sm font-medium text-gray-900">Border width</label>
                     <Select
-                      value={buttonStyles.borderWidth}
-                      onValueChange={(value) => updateButtonStyles({ borderWidth: value })}
+                      value={(getCurrentElement() as ButtonElement)?.borderWidth || "0"}
+                      onValueChange={(value) => updateCurrentElement({ borderWidth: value })}
                     >
                       <SelectTrigger>
                         <SelectValue />
@@ -966,8 +966,8 @@ export default function FormBuilderPage() {
                   <div>
                     <label className="mb-2 block text-sm font-medium text-gray-900">Border radius</label>
                     <Select
-                      value={buttonStyles.borderRadius}
-                      onValueChange={(value) => updateButtonStyles({ borderRadius: value })}
+                      value={(getCurrentElement() as ButtonElement)?.borderRadius || "0"}
+                      onValueChange={(value) => updateCurrentElement({ borderRadius: value })}
                     >
                       <SelectTrigger>
                         <SelectValue />
@@ -991,8 +991,8 @@ export default function FormBuilderPage() {
                       <div>
                         <label className="mb-1 block text-xs text-gray-600">Height (px)</label>
                         <Select
-                          value={buttonStyles.height}
-                          onValueChange={(value) => updateButtonStyles({ height: value })}
+                          value={(getCurrentElement() as ButtonElement)?.height || "48"}
+                          onValueChange={(value) => updateCurrentElement({ height: value })}
                         >
                           <SelectTrigger>
                             <SelectValue />
@@ -1009,8 +1009,8 @@ export default function FormBuilderPage() {
                       <div>
                         <label className="mb-1 block text-xs text-gray-600">Width (%)</label>
                         <Select
-                          value={buttonStyles.width}
-                          onValueChange={(value) => updateButtonStyles({ width: value })}
+                          value={(getCurrentElement() as ButtonElement)?.width || "100"}
+                          onValueChange={(value) => updateCurrentElement({ width: value })}
                         >
                           <SelectTrigger>
                             <SelectValue />
@@ -1044,8 +1044,8 @@ export default function FormBuilderPage() {
                     <label className="mb-2 block text-sm font-medium text-gray-900">Font</label>
                     <div className="flex gap-2">
                       <Select
-                        value={buttonStyles.fontFamily}
-                        onValueChange={(value) => updateButtonStyles({ fontFamily: value })}
+                        value={(getCurrentElement() as ButtonElement)?.fontFamily || "Arial"}
+                        onValueChange={(value) => updateCurrentElement({ fontFamily: value })}
                       >
                         <SelectTrigger className="flex-1">
                           <SelectValue />
@@ -1059,8 +1059,8 @@ export default function FormBuilderPage() {
                         </SelectContent>
                       </Select>
                       <Select
-                        value={buttonStyles.fontWeight}
-                        onValueChange={(value) => updateButtonStyles({ fontWeight: value })}
+                        value={(getCurrentElement() as ButtonElement)?.fontWeight || "400"}
+                        onValueChange={(value) => updateCurrentElement({ fontWeight: value })}
                       >
                         <SelectTrigger className="flex-1">
                           <SelectValue />
@@ -1080,8 +1080,8 @@ export default function FormBuilderPage() {
                   <div>
                     <label className="mb-2 block text-sm font-medium text-gray-900">Size</label>
                     <Select
-                      value={buttonStyles.fontSize}
-                      onValueChange={(value) => updateButtonStyles({ fontSize: value })}
+                      value={(getCurrentElement() as ButtonElement)?.fontSize || "14"}
+                      onValueChange={(value) => updateCurrentElement({ fontSize: value })}
                     >
                       <SelectTrigger>
                         <SelectValue />
@@ -1103,14 +1103,14 @@ export default function FormBuilderPage() {
                     <div className="flex items-center gap-2">
                       <Input
                         type="text"
-                        value={buttonStyles.fontColor}
-                        onChange={(e) => updateButtonStyles({ fontColor: e.target.value })}
+                        value={(getCurrentElement() as ButtonElement)?.fontColor || "#FFFFFF"}
+                        onChange={(e) => updateCurrentElement({ fontColor: e.target.value })}
                         className="flex-1 text-sm"
                       />
                       <input
                         type="color"
-                        value={buttonStyles.fontColor}
-                        onChange={(e) => updateButtonStyles({ fontColor: e.target.value })}
+                        value={(getCurrentElement() as ButtonElement)?.fontColor || "#FFFFFF"}
+                        onChange={(e) => updateCurrentElement({ fontColor: e.target.value })}
                         className="h-10 w-10 shrink-0 cursor-pointer rounded-full border border-gray-300"
                       />
                     </div>
@@ -1122,31 +1122,31 @@ export default function FormBuilderPage() {
                     <div className="flex gap-2">
                       <button
                         className={`flex h-10 flex-1 items-center justify-center rounded border ${
-                          buttonStyles.textAlign === "left"
+                          (getCurrentElement() as ButtonElement)?.textAlign === "left"
                             ? "border-blue-500 bg-blue-50"
                             : "border-gray-300 hover:bg-gray-50"
                         }`}
-                        onClick={() => updateButtonStyles({ textAlign: "left" })}
+                        onClick={() => updateCurrentElement({ textAlign: "left" })}
                       >
                         <AlignLeft className="h-4 w-4" />
                       </button>
                       <button
                         className={`flex h-10 flex-1 items-center justify-center rounded border ${
-                          buttonStyles.textAlign === "center"
+                          (getCurrentElement() as ButtonElement)?.textAlign === "center"
                             ? "border-blue-500 bg-blue-50"
                             : "border-gray-300 hover:bg-gray-50"
                         }`}
-                        onClick={() => updateButtonStyles({ textAlign: "center" })}
+                        onClick={() => updateCurrentElement({ textAlign: "center" })}
                       >
                         <AlignCenter className="h-4 w-4" />
                       </button>
                       <button
                         className={`flex h-10 flex-1 items-center justify-center rounded border ${
-                          buttonStyles.textAlign === "right"
+                          (getCurrentElement() as ButtonElement)?.textAlign === "right"
                             ? "border-blue-500 bg-blue-50"
                             : "border-gray-300 hover:bg-gray-50"
                         }`}
-                        onClick={() => updateButtonStyles({ textAlign: "right" })}
+                        onClick={() => updateCurrentElement({ textAlign: "right" })}
                       >
                         <AlignRight className="h-4 w-4" />
                       </button>
@@ -1160,8 +1160,8 @@ export default function FormBuilderPage() {
                       <div>
                         <label className="mb-1 block text-xs text-gray-600">Line height</label>
                         <Select
-                          value={buttonStyles.lineHeight}
-                          onValueChange={(value) => updateButtonStyles({ lineHeight: value })}
+                          value={(getCurrentElement() as ButtonElement)?.lineHeight || "1"}
+                          onValueChange={(value) => updateCurrentElement({ lineHeight: value })}
                         >
                           <SelectTrigger>
                             <SelectValue />
@@ -1179,8 +1179,8 @@ export default function FormBuilderPage() {
                       <div>
                         <label className="mb-1 block text-xs text-gray-600">Letter spacing</label>
                         <Select
-                          value={buttonStyles.letterSpacing}
-                          onValueChange={(value) => updateButtonStyles({ letterSpacing: value })}
+                          value={(getCurrentElement() as ButtonElement)?.letterSpacing || "0"}
+                          onValueChange={(value) => updateCurrentElement({ letterSpacing: value })}
                         >
                           <SelectTrigger>
                             <SelectValue />
