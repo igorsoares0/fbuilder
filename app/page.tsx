@@ -964,13 +964,6 @@ export default function FormBuilderPage() {
                     </div>
                   </div>
                 </div>
-
-                {/* Add Text Button */}
-                <div className="pt-4">
-                  <Button variant="outline" className="w-full bg-transparent">
-                    Add text
-                  </Button>
-                </div>
               </div>
             </>
           )}
@@ -1122,13 +1115,6 @@ export default function FormBuilderPage() {
                         </Select>
                       </div>
                     </div>
-                  </div>
-
-                  {/* Add Button */}
-                  <div className="pt-4">
-                    <Button variant="outline" className="w-full bg-transparent">
-                      Add button
-                    </Button>
                   </div>
                 </div>
               )}
