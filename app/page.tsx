@@ -111,7 +111,7 @@ export default function FormBuilderPage() {
       id: "main-image",
       elementType: "image",
       url: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/text-editor-q4PVzyjDcuig9i4hLmgvReaMzJ8hhm.png",
-      alt: "Background image",
+      alt: "Decorative image",
       width: "50",
       height: "100",
       borderRadius: "0",
@@ -304,6 +304,38 @@ export default function FormBuilderPage() {
   }
 
   const updateCurrentElement = (updates: Partial<FormElement>) => {
+    // Se estamos mudando o position de uma imagem para "none", deletar a imagem
+    if (updates.position === "none") {
+      const currentElement = formElements.find(el => el.id === selectedElementId)
+      if (currentElement?.elementType === "image") {
+        setFormElements(formElements.filter((el) => el.id !== selectedElementId))
+        // Resetar seleção
+        setSelectedElement("text")
+        setSelectedElementId(formElements.find(el => el.elementType === "text")?.id || "")
+        return
+      }
+    }
+
+    // Se estamos mudando o position de uma imagem para não-inline,
+    // resetar outras imagens para inline
+    if (updates.position && updates.position !== "inline" && updates.position !== "none") {
+      const currentElement = formElements.find(el => el.id === selectedElementId)
+      if (currentElement?.elementType === "image") {
+        setFormElements(
+          formElements.map((el) => {
+            if (el.id === selectedElementId) {
+              return { ...el, ...updates } as FormElement
+            } else if (el.elementType === "image" && (el as ImageElement).position !== "inline") {
+              // Resetar outras imagens para inline
+              return { ...el, position: "inline" } as FormElement
+            }
+            return el
+          })
+        )
+        return
+      }
+    }
+
     setFormElements(
       formElements.map((el) => (el.id === selectedElementId ? { ...el, ...updates } as FormElement : el))
     )
@@ -478,12 +510,12 @@ export default function FormBuilderPage() {
         {/* Canvas Area */}
         <div className="flex flex-1 items-center justify-center bg-gray-50">
           {(() => {
-            // Find background/positioned image
-            const backgroundImage = formElements.find(el => el.elementType === "image" && el.position !== "inline") as ImageElement | undefined
-            const position = backgroundImage?.position || "none"
+            // Find positioned image (any image with position !== "inline")
+            const positionedImage = formElements.find(el => el.elementType === "image" && (el as ImageElement).position !== "inline") as ImageElement | undefined
+            const position = positionedImage?.position || "none"
 
-            // Filter out background image from regular elements
-            const regularElements = formElements.filter(el => !(el.elementType === "image" && el.position !== "inline"))
+            // Filter elements: remove positioned image from regular flow
+            const inlineElements = formElements.filter(el => !(el.elementType === "image" && (el as ImageElement).position !== "inline"))
 
             return (
               <div
@@ -501,45 +533,45 @@ export default function FormBuilderPage() {
                     : "flex-row"
                 }`}
               >
-                {/* Background/Positioned Image Section */}
-                {position === "background" && backgroundImage ? (
+                {/* Positioned Image Section */}
+                {position === "background" && positionedImage ? (
                   <div
                     className={`absolute inset-0 cursor-pointer ${
-                      selectedElement === "image" && selectedElementId === backgroundImage.id ? "ring-4 ring-blue-500 ring-inset" : ""
+                      selectedElement === "image" && selectedElementId === positionedImage.id ? "ring-4 ring-blue-500 ring-inset" : ""
                     }`}
-                    onClick={() => handleSelectElement("image", backgroundImage.id)}
+                    onClick={() => handleSelectElement("image", positionedImage.id)}
                   >
                     <img
-                      src={backgroundImage.url}
-                      alt={backgroundImage.alt}
+                      src={positionedImage.url}
+                      alt={positionedImage.alt}
                       className="h-full w-full object-cover"
-                      style={{ opacity: parseInt(backgroundImage.opacity || "100") / 100 }}
+                      style={{ opacity: parseInt(positionedImage.opacity || "100") / 100 }}
                     />
                   </div>
-                ) : position === "none" || !backgroundImage ? null : (
+                ) : position !== "none" && position !== "inline" && positionedImage ? (
                   <div
-                    className={`relative cursor-pointer bg-[#C9B896] ${
-                      selectedElement === "image" && selectedElementId === backgroundImage?.id ? "ring-4 ring-blue-500 ring-inset" : ""
+                    className={`relative cursor-pointer bg-[#C9B896] flex items-center justify-center ${
+                      selectedElement === "image" && selectedElementId === positionedImage.id ? "ring-4 ring-blue-500 ring-inset" : ""
                     }`}
                     style={{
                       height:
                         position === "top" || position === "bottom"
-                          ? `${backgroundImage?.height || 50}%`
+                          ? `${positionedImage.height}%`
                           : "100%",
                       width:
                         position === "left" || position === "right"
-                          ? `${backgroundImage?.width || 50}%`
+                          ? `${positionedImage.width}%`
                           : "100%",
                     }}
-                    onClick={() => backgroundImage && handleSelectElement("image", backgroundImage.id)}
+                    onClick={() => handleSelectElement("image", positionedImage.id)}
                   >
                     <img
-                      src={backgroundImage?.url || ""}
-                      alt={backgroundImage?.alt || ""}
+                      src={positionedImage.url}
+                      alt={positionedImage.alt}
                       className="h-full w-full object-cover"
                     />
                   </div>
-                )}
+                ) : null}
 
                 {/* Form Section */}
                 <div
@@ -548,25 +580,27 @@ export default function FormBuilderPage() {
                       ? "relative z-10 h-full w-full"
                       : position === "none"
                       ? "relative h-full w-full bg-[#EDE8E3]"
-                      : "flex-1 bg-[#EDE8E3]"
+                      : position !== "inline" && positionedImage
+                      ? "flex-1 bg-[#EDE8E3]"
+                      : "relative h-full w-full bg-[#EDE8E3]"
                   }`}
                   style={
-                    position === "background" || position === "none"
+                    position === "background" || position === "none" || position === "inline"
                       ? {}
                       : {
                           height:
                             position === "top" || position === "bottom"
-                              ? `${100 - parseInt(backgroundImage?.height || "50")}%`
+                              ? `${100 - parseInt(positionedImage?.height || "50")}%`
                               : "100%",
                           width:
                             position === "left" || position === "right"
-                              ? `${100 - parseInt(backgroundImage?.width || "50")}%`
+                              ? `${100 - parseInt(positionedImage?.width || "50")}%`
                               : "100%",
                         }
                   }
                 >
                   <div className="w-full max-w-md space-y-6">
-                    {regularElements.map((element, index) => (
+                    {inlineElements.map((element, index) => (
                   <div key={element.id} className="group relative">
                     {/* Render based on element type */}
                     {element.elementType === "text" && (
@@ -723,6 +757,9 @@ export default function FormBuilderPage() {
                             : ""
                         }`}
                         onClick={() => handleSelectElement("image", element.id)}
+                        style={{
+                          width: element.position === "inline" ? "100%" : `${element.width}%`,
+                        }}
                       >
                         <img
                           src={element.url}
@@ -731,6 +768,7 @@ export default function FormBuilderPage() {
                           style={{
                             height: `${element.height}px`,
                             borderRadius: `${element.borderRadius}px`,
+                            opacity: element.position === "background" ? parseInt(element.opacity || "100") / 100 : 1,
                           }}
                         />
                       </div>
@@ -1684,27 +1722,29 @@ export default function FormBuilderPage() {
                   />
                 </div>
 
-                {/* Image Height */}
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-gray-900">Height (px)</label>
-                  <Select
-                    value={(getCurrentElement() as ImageElement)?.height || "200"}
-                    onValueChange={(value) => updateCurrentElement({ height: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="100">100</SelectItem>
-                      <SelectItem value="150">150</SelectItem>
-                      <SelectItem value="200">200</SelectItem>
-                      <SelectItem value="250">250</SelectItem>
-                      <SelectItem value="300">300</SelectItem>
-                      <SelectItem value="400">400</SelectItem>
-                      <SelectItem value="500">500</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                {/* Image Height - Only for inline position (height in pixels) */}
+                {((getCurrentElement() as ImageElement)?.position === "inline" || (getCurrentElement() as ImageElement)?.position === "none") && (
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-gray-900">Height (px)</label>
+                    <Select
+                      value={(getCurrentElement() as ImageElement)?.height || "200"}
+                      onValueChange={(value) => updateCurrentElement({ height: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="100">100</SelectItem>
+                        <SelectItem value="150">150</SelectItem>
+                        <SelectItem value="200">200</SelectItem>
+                        <SelectItem value="250">250</SelectItem>
+                        <SelectItem value="300">300</SelectItem>
+                        <SelectItem value="400">400</SelectItem>
+                        <SelectItem value="500">500</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
 
                 {/* Border Radius */}
                 <div>
@@ -1752,59 +1792,61 @@ export default function FormBuilderPage() {
                   </Select>
                 </div>
 
-                {/* Image Sizing */}
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-gray-900">
-                    {(getCurrentElement() as ImageElement)?.position === "background" ? "Opacity" : "Image sizing"}
-                  </label>
-                  <div className="space-y-3">
-                    <div>
-                      <label className="mb-1 block text-xs text-gray-600">
-                        {(getCurrentElement() as ImageElement)?.position === "background"
-                          ? "Opacity (%)"
-                          : (getCurrentElement() as ImageElement)?.position === "top" || (getCurrentElement() as ImageElement)?.position === "bottom"
-                          ? "Height (%)"
-                          : "Width (%)"}
-                      </label>
-                      <Select
-                        value={
-                          (getCurrentElement() as ImageElement)?.position === "background"
-                            ? (getCurrentElement() as ImageElement)?.opacity || "100"
+                {/* Image Sizing - Only show for non-inline positions */}
+                {(getCurrentElement() as ImageElement)?.position !== "inline" && (getCurrentElement() as ImageElement)?.position !== "none" && (
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-gray-900">
+                      {(getCurrentElement() as ImageElement)?.position === "background" ? "Opacity" : "Image sizing"}
+                    </label>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="mb-1 block text-xs text-gray-600">
+                          {(getCurrentElement() as ImageElement)?.position === "background"
+                            ? "Opacity (%)"
                             : (getCurrentElement() as ImageElement)?.position === "top" || (getCurrentElement() as ImageElement)?.position === "bottom"
-                            ? (getCurrentElement() as ImageElement)?.height || "50"
-                            : (getCurrentElement() as ImageElement)?.width || "100"
-                        }
-                        onValueChange={(value) => {
-                          if ((getCurrentElement() as ImageElement)?.position === "background") {
-                            updateCurrentElement({ opacity: value })
-                          } else if ((getCurrentElement() as ImageElement)?.position === "top" || (getCurrentElement() as ImageElement)?.position === "bottom") {
-                            updateCurrentElement({ height: value })
-                          } else {
-                            updateCurrentElement({ width: value })
+                            ? "Height (%)"
+                            : "Width (%)"}
+                        </label>
+                        <Select
+                          value={
+                            (getCurrentElement() as ImageElement)?.position === "background"
+                              ? (getCurrentElement() as ImageElement)?.opacity || "100"
+                              : (getCurrentElement() as ImageElement)?.position === "top" || (getCurrentElement() as ImageElement)?.position === "bottom"
+                              ? (getCurrentElement() as ImageElement)?.height || "50"
+                              : (getCurrentElement() as ImageElement)?.width || "100"
                           }
-                        }}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="10">10%</SelectItem>
-                          <SelectItem value="20">20%</SelectItem>
-                          <SelectItem value="25">25%</SelectItem>
-                          <SelectItem value="30">30%</SelectItem>
-                          <SelectItem value="40">40%</SelectItem>
-                          <SelectItem value="50">50%</SelectItem>
-                          <SelectItem value="60">60%</SelectItem>
-                          <SelectItem value="70">70%</SelectItem>
-                          <SelectItem value="75">75%</SelectItem>
-                          <SelectItem value="80">80%</SelectItem>
-                          <SelectItem value="90">90%</SelectItem>
-                          <SelectItem value="100">100%</SelectItem>
-                        </SelectContent>
-                      </Select>
+                          onValueChange={(value) => {
+                            if ((getCurrentElement() as ImageElement)?.position === "background") {
+                              updateCurrentElement({ opacity: value })
+                            } else if ((getCurrentElement() as ImageElement)?.position === "top" || (getCurrentElement() as ImageElement)?.position === "bottom") {
+                              updateCurrentElement({ height: value })
+                            } else {
+                              updateCurrentElement({ width: value })
+                            }
+                          }}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="10">10%</SelectItem>
+                            <SelectItem value="20">20%</SelectItem>
+                            <SelectItem value="25">25%</SelectItem>
+                            <SelectItem value="30">30%</SelectItem>
+                            <SelectItem value="40">40%</SelectItem>
+                            <SelectItem value="50">50%</SelectItem>
+                            <SelectItem value="60">60%</SelectItem>
+                            <SelectItem value="70">70%</SelectItem>
+                            <SelectItem value="75">75%</SelectItem>
+                            <SelectItem value="80">80%</SelectItem>
+                            <SelectItem value="90">90%</SelectItem>
+                            <SelectItem value="100">100%</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
               </div>
             </>
           )}
