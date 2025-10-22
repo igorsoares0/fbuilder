@@ -1,12 +1,12 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Monitor, Smartphone, AlignLeft, AlignCenter, AlignRight, Upload, Plus, Type, MousePointer, Image as ImageIcon } from "lucide-react"
+import { Monitor, Smartphone, AlignLeft, AlignCenter, AlignRight, Upload, Plus, Type, MousePointer, Image as ImageIcon, Undo, Redo } from "lucide-react"
 
 type ElementType = "text" | "button" | "field" | "image" | null
 
@@ -202,6 +202,11 @@ export default function FormBuilderPage() {
     },
   ])
 
+  // History management for undo/redo
+  const [history, setHistory] = useState<FormElement[][]>([])
+  const [historyIndex, setHistoryIndex] = useState(-1)
+  const isUndoRedoAction = useRef(false)
+
   // Text properties - separate states for heading and description
   const [headingStyles, setHeadingStyles] = useState({
     fontFamily: "Georgia",
@@ -340,6 +345,65 @@ export default function FormBuilderPage() {
       formElements.map((el) => (el.id === selectedElementId ? { ...el, ...updates } as FormElement : el))
     )
   }
+
+  // Track changes to formElements for undo/redo
+  useEffect(() => {
+    // Skip if this is an undo/redo action
+    if (isUndoRedoAction.current) {
+      isUndoRedoAction.current = false
+      return
+    }
+
+    // Add current state to history
+    setHistory(prev => {
+      // Remove any future history if we're not at the end
+      const newHistory = prev.slice(0, historyIndex + 1)
+      // Add current state
+      newHistory.push(JSON.parse(JSON.stringify(formElements)))
+      // Limit history to 50 states
+      return newHistory.slice(-50)
+    })
+    setHistoryIndex(prev => Math.min(prev + 1, 49))
+  }, [formElements])
+
+  // Undo function
+  const handleUndo = () => {
+    if (historyIndex > 0) {
+      isUndoRedoAction.current = true
+      const previousState = history[historyIndex - 1]
+      setFormElements(JSON.parse(JSON.stringify(previousState)))
+      setHistoryIndex(prev => prev - 1)
+    }
+  }
+
+  // Redo function
+  const handleRedo = () => {
+    if (historyIndex < history.length - 1) {
+      isUndoRedoAction.current = true
+      const nextState = history[historyIndex + 1]
+      setFormElements(JSON.parse(JSON.stringify(nextState)))
+      setHistoryIndex(prev => prev + 1)
+    }
+  }
+
+  // Keyboard shortcuts for undo/redo
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Check if Ctrl (Windows/Linux) or Cmd (Mac) is pressed
+      const isModifierKey = e.ctrlKey || e.metaKey
+
+      if (isModifierKey && e.key === "z") {
+        e.preventDefault()
+        handleUndo()
+      } else if (isModifierKey && (e.key === "y" || (e.shiftKey && e.key === "z"))) {
+        e.preventDefault()
+        handleRedo()
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [historyIndex, history])
 
   const handleSelectElement = (type: ElementType, id: string) => {
     // Se já está selecionado, entra em modo de edição
@@ -485,6 +549,31 @@ export default function FormBuilderPage() {
         </div>
 
         <div className="flex items-center gap-3">
+          <button
+            onClick={handleUndo}
+            disabled={historyIndex <= 0}
+            className={`rounded p-2 ${
+              historyIndex <= 0
+                ? "cursor-not-allowed opacity-30"
+                : "hover:bg-gray-100"
+            }`}
+            title="Undo (Ctrl+Z)"
+          >
+            <Undo className="h-4 w-4 text-gray-400" />
+          </button>
+          <button
+            onClick={handleRedo}
+            disabled={historyIndex >= history.length - 1}
+            className={`rounded p-2 ${
+              historyIndex >= history.length - 1
+                ? "cursor-not-allowed opacity-30"
+                : "hover:bg-gray-100"
+            }`}
+            title="Redo (Ctrl+Y)"
+          >
+            <Redo className="h-4 w-4 text-gray-400" />
+          </button>
+          <div className="h-6 w-px bg-gray-300" />
           <button className="rounded p-2 hover:bg-gray-100">
             <Monitor className="h-4 w-4 text-gray-400" />
           </button>
