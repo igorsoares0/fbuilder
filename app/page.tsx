@@ -629,7 +629,9 @@ export default function FormBuilderPage() {
                     : position === "bottom"
                     ? "flex-col-reverse"
                     : position === "right"
-                    ? "flex-row-reverse"
+                    ? previewMode === "mobile" ? "flex-col" : "flex-row-reverse"
+                    : position === "left"
+                    ? previewMode === "mobile" ? "flex-col" : "flex-row"
                     : position === "background" || position === "none"
                     ? ""
                     : "flex-row"
@@ -659,9 +661,11 @@ export default function FormBuilderPage() {
                       height:
                         position === "top" || position === "bottom"
                           ? `${positionedImage.height}%`
+                          : (position === "left" || position === "right") && previewMode === "mobile"
+                          ? `${positionedImage.width}%`
                           : "100%",
                       width:
-                        position === "left" || position === "right"
+                        (position === "left" || position === "right") && previewMode === "desktop"
                           ? `${positionedImage.width}%`
                           : "100%",
                     }}
@@ -677,7 +681,9 @@ export default function FormBuilderPage() {
 
                 {/* Form Section */}
                 <div
-                  className={`flex items-center justify-center px-16 py-20 ${
+                  className={`flex items-center justify-center ${
+                    previewMode === "mobile" ? "px-8 py-12" : "px-16 py-20"
+                  } ${
                     position === "background"
                       ? "relative z-10 h-full w-full"
                       : position === "none"
@@ -693,9 +699,11 @@ export default function FormBuilderPage() {
                           height:
                             position === "top" || position === "bottom"
                               ? `${100 - parseInt(positionedImage?.height || "50")}%`
+                              : (position === "left" || position === "right") && previewMode === "mobile"
+                              ? `${100 - parseInt(positionedImage?.width || "50")}%`
                               : "100%",
                           width:
-                            position === "left" || position === "right"
+                            (position === "left" || position === "right") && previewMode === "desktop"
                               ? `${100 - parseInt(positionedImage?.width || "50")}%`
                               : "100%",
                         }
