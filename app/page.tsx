@@ -106,6 +106,7 @@ export default function FormBuilderPage() {
   const [showAddMenu, setShowAddMenu] = useState(false)
   const [addMenuPosition, setAddMenuPosition] = useState<number | null>(null)
   const [editingElementId, setEditingElementId] = useState<string | null>(null)
+  const [previewMode, setPreviewMode] = useState<"desktop" | "mobile">("desktop")
   const [formElements, setFormElements] = useState<FormElement[]>([
     {
       id: "main-image",
@@ -574,11 +575,31 @@ export default function FormBuilderPage() {
             <Redo className="h-4 w-4 text-gray-400" />
           </button>
           <div className="h-6 w-px bg-gray-300" />
-          <button className="rounded p-2 hover:bg-gray-100">
-            <Monitor className="h-4 w-4 text-gray-400" />
+          <button
+            onClick={() => setPreviewMode("desktop")}
+            className={`rounded p-2 ${
+              previewMode === "desktop"
+                ? "bg-blue-50 ring-2 ring-blue-500"
+                : "hover:bg-gray-100"
+            }`}
+            title="Desktop preview"
+          >
+            <Monitor className={`h-4 w-4 ${
+              previewMode === "desktop" ? "text-blue-500" : "text-gray-400"
+            }`} />
           </button>
-          <button className="rounded p-2 hover:bg-gray-100">
-            <Smartphone className="h-4 w-4 text-gray-400" />
+          <button
+            onClick={() => setPreviewMode("mobile")}
+            className={`rounded p-2 ${
+              previewMode === "mobile"
+                ? "bg-blue-50 ring-2 ring-blue-500"
+                : "hover:bg-gray-100"
+            }`}
+            title="Mobile preview"
+          >
+            <Smartphone className={`h-4 w-4 ${
+              previewMode === "mobile" ? "text-blue-500" : "text-gray-400"
+            }`} />
           </button>
           <Button className="bg-black px-8 py-2 text-sm font-medium text-white hover:bg-gray-900">SAVE</Button>
         </div>
@@ -600,7 +621,9 @@ export default function FormBuilderPage() {
               <div
                 className={`${
                   position === "background" || position === "none" ? "relative" : "flex"
-                } h-full w-full max-w-6xl ${
+                } h-full w-full transition-all duration-300 ${
+                  previewMode === "desktop" ? "max-w-6xl" : "max-w-md"
+                } ${
                   position === "top"
                     ? "flex-col"
                     : position === "bottom"
