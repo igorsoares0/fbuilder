@@ -350,8 +350,11 @@ function FormBuilderContent() {
   }
 
   const updateCurrentElement = (updates: Partial<FormElement>) => {
+    // Type guard para verificar se updates tem position (é Partial<ImageElement>)
+    const hasPosition = 'position' in updates
+
     // Se estamos mudando o position de uma imagem para "none", deletar a imagem
-    if (updates.position === "none") {
+    if (hasPosition && updates.position === "none") {
       const currentElement = formElements.find(el => el.id === selectedElementId)
       if (currentElement?.elementType === "image") {
         setFormElements(formElements.filter((el) => el.id !== selectedElementId))
@@ -364,7 +367,7 @@ function FormBuilderContent() {
 
     // Se estamos mudando o position de uma imagem para não-inline,
     // resetar outras imagens para inline
-    if (updates.position && updates.position !== "inline" && updates.position !== "none") {
+    if (hasPosition && updates.position && updates.position !== "inline" && updates.position !== "none") {
       const currentElement = formElements.find(el => el.id === selectedElementId)
       if (currentElement?.elementType === "image") {
         setFormElements(
