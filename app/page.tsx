@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Monitor, Smartphone, AlignLeft, AlignCenter, AlignRight, Upload, Plus, Type, MousePointer, Image as ImageIcon, Undo, Redo, ArrowLeft } from "lucide-react"
+import { Monitor, Smartphone, AlignLeft, AlignCenter, AlignRight, Upload, Plus, Type, MousePointer, Image as ImageIcon, Undo, Redo, ArrowLeft, Settings } from "lucide-react"
 
 type ElementType = "text" | "button" | "field" | "image" | null
 
@@ -230,6 +230,18 @@ function FormBuilderContent() {
   const [editingElementId, setEditingElementId] = useState<string | null>(null)
   const [previewMode, setPreviewMode] = useState<"desktop" | "mobile">("desktop")
   const [formElements, setFormElements] = useState<FormElement[]>(getInitialElements())
+  const [showFormSettings, setShowFormSettings] = useState(false)
+
+  // Form background settings
+  const [formBackground, setFormBackground] = useState({
+    type: "color" as "color" | "gradient" | "image",
+    color: "#EDE8E3",
+    gradientFrom: "#EDE8E3",
+    gradientTo: "#D4CFC8",
+    gradientDirection: "to bottom" as "to bottom" | "to top" | "to right" | "to left" | "to bottom right",
+    imageUrl: "",
+    imageOpacity: "100",
+  })
 
   // History management for undo/redo
   const [history, setHistory] = useState<FormElement[][]>([])
@@ -444,6 +456,7 @@ function FormBuilderContent() {
     setSelectedElement(type)
     setSelectedElementId(id)
     setEditingElementId(null)
+    setShowFormSettings(false)
     if (type === "text") setActiveTab("font")
     if (type === "button") setActiveTab("style")
     if (type === "field") setActiveTab("fields")
@@ -585,6 +598,18 @@ function FormBuilderContent() {
         <div className="flex items-center gap-8">
           <button className="text-sm font-medium text-gray-900">Design</button>
           <button className="text-sm font-medium text-gray-400">Thank you</button>
+          <button
+            onClick={() => {
+              setShowFormSettings(true)
+              setSelectedElement(null)
+            }}
+            className={`flex items-center gap-2 text-sm font-medium transition-colors ${
+              showFormSettings ? "text-blue-600" : "text-gray-500 hover:text-gray-900"
+            }`}
+          >
+            <Settings className="h-4 w-4" />
+            Form Settings
+          </button>
         </div>
 
         <div className="flex items-center gap-3">
@@ -725,13 +750,13 @@ function FormBuilderContent() {
                     position === "background"
                       ? "relative z-10 h-full w-full"
                       : position === "none"
-                      ? "relative h-full w-full bg-[#EDE8E3]"
+                      ? "relative h-full w-full"
                       : position !== "inline" && positionedImage
-                      ? "flex-1 bg-[#EDE8E3]"
-                      : "relative h-full w-full bg-[#EDE8E3]"
+                      ? "flex-1"
+                      : "relative h-full w-full"
                   }`}
-                  style={
-                    position === "background" || position === "none" || position === "inline"
+                  style={{
+                    ...(position === "background" || position === "none" || position === "inline"
                       ? {}
                       : {
                           height:
@@ -744,8 +769,21 @@ function FormBuilderContent() {
                             (position === "left" || position === "right") && previewMode === "desktop"
                               ? `${100 - parseInt(positionedImage?.width || "50")}%`
                               : "100%",
-                        }
-                  }
+                        }),
+                    // Apply background settings
+                    ...(formBackground.type === "color" ? {
+                      backgroundColor: formBackground.color,
+                    } : formBackground.type === "gradient" ? {
+                      background: `linear-gradient(${formBackground.gradientDirection}, ${formBackground.gradientFrom}, ${formBackground.gradientTo})`,
+                    } : formBackground.type === "image" && formBackground.imageUrl ? {
+                      backgroundImage: `url(${formBackground.imageUrl})`,
+                      backgroundSize: "cover",
+                      backgroundPosition: "center",
+                      backgroundRepeat: "no-repeat",
+                    } : {
+                      backgroundColor: formBackground.color,
+                    }),
+                  }}
                 >
                   <div className="w-full max-w-md space-y-6">
                     {inlineElements.map((element, index) => (
@@ -951,6 +989,163 @@ function FormBuilderContent() {
 
         {/* Right Sidebar - Properties Panel */}
         <div className="w-80 border-l border-gray-200 bg-white p-6 overflow-y-auto">
+          {/* Form Settings Panel */}
+          {showFormSettings && (
+            <>
+              <h2 className="mb-8 text-lg font-semibold">Form Background</h2>
+
+              <div className="space-y-6">
+                {/* Background Type */}
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-gray-900">Background Type</label>
+                  <Select
+                    value={formBackground.type}
+                    onValueChange={(value: "color" | "gradient" | "image") =>
+                      setFormBackground({ ...formBackground, type: value })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="color">Solid Color</SelectItem>
+                      <SelectItem value="gradient">Gradient</SelectItem>
+                      <SelectItem value="image">Image</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Solid Color */}
+                {formBackground.type === "color" && (
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-gray-900">Background Color</label>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="text"
+                        value={formBackground.color}
+                        onChange={(e) => setFormBackground({ ...formBackground, color: e.target.value })}
+                        className="flex-1 text-sm"
+                      />
+                      <input
+                        type="color"
+                        value={formBackground.color}
+                        onChange={(e) => setFormBackground({ ...formBackground, color: e.target.value })}
+                        className="h-10 w-10 shrink-0 cursor-pointer rounded-full border border-gray-300"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Gradient */}
+                {formBackground.type === "gradient" && (
+                  <>
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-gray-900">Gradient From</label>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          type="text"
+                          value={formBackground.gradientFrom}
+                          onChange={(e) => setFormBackground({ ...formBackground, gradientFrom: e.target.value })}
+                          className="flex-1 text-sm"
+                        />
+                        <input
+                          type="color"
+                          value={formBackground.gradientFrom}
+                          onChange={(e) => setFormBackground({ ...formBackground, gradientFrom: e.target.value })}
+                          className="h-10 w-10 shrink-0 cursor-pointer rounded-full border border-gray-300"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-gray-900">Gradient To</label>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          type="text"
+                          value={formBackground.gradientTo}
+                          onChange={(e) => setFormBackground({ ...formBackground, gradientTo: e.target.value })}
+                          className="flex-1 text-sm"
+                        />
+                        <input
+                          type="color"
+                          value={formBackground.gradientTo}
+                          onChange={(e) => setFormBackground({ ...formBackground, gradientTo: e.target.value })}
+                          className="h-10 w-10 shrink-0 cursor-pointer rounded-full border border-gray-300"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-gray-900">Direction</label>
+                      <Select
+                        value={formBackground.gradientDirection}
+                        onValueChange={(value: any) =>
+                          setFormBackground({ ...formBackground, gradientDirection: value })
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="to bottom">Top to Bottom</SelectItem>
+                          <SelectItem value="to top">Bottom to Top</SelectItem>
+                          <SelectItem value="to right">Left to Right</SelectItem>
+                          <SelectItem value="to left">Right to Left</SelectItem>
+                          <SelectItem value="to bottom right">Diagonal</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </>
+                )}
+
+                {/* Image */}
+                {formBackground.type === "image" && (
+                  <>
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-gray-900">Image URL</label>
+                      <Input
+                        type="text"
+                        value={formBackground.imageUrl}
+                        onChange={(e) => setFormBackground({ ...formBackground, imageUrl: e.target.value })}
+                        placeholder="https://example.com/image.jpg"
+                        className="text-sm"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-gray-900">Upload Image</label>
+                      <label
+                        htmlFor="bg-image-upload"
+                        className="flex h-32 cursor-pointer items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 hover:bg-gray-100"
+                      >
+                        <div className="text-center">
+                          <Upload className="mx-auto mb-2 h-6 w-6 text-gray-400" />
+                          <p className="text-sm text-gray-600">Upload background image</p>
+                        </div>
+                      </label>
+                      <input
+                        id="bg-image-upload"
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0]
+                          if (file) {
+                            const reader = new FileReader()
+                            reader.onloadend = () => {
+                              setFormBackground({ ...formBackground, imageUrl: reader.result as string })
+                            }
+                            reader.readAsDataURL(file)
+                          }
+                        }}
+                        className="hidden"
+                      />
+                    </div>
+                  </>
+                )}
+              </div>
+            </>
+          )}
+
           {/* Text Editor Panel */}
           {selectedElement === "text" && getCurrentElement()?.elementType === "text" && (
             <>
