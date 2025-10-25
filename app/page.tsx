@@ -1,12 +1,13 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, Suspense } from "react"
+import { useSearchParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Monitor, Smartphone, AlignLeft, AlignCenter, AlignRight, Upload, Plus, Type, MousePointer, Image as ImageIcon, Undo, Redo } from "lucide-react"
+import { Monitor, Smartphone, AlignLeft, AlignCenter, AlignRight, Upload, Plus, Type, MousePointer, Image as ImageIcon, Undo, Redo, ArrowLeft } from "lucide-react"
 
 type ElementType = "text" | "button" | "field" | "image" | null
 
@@ -99,7 +100,128 @@ interface FormField {
   textAlign: "left" | "center" | "right"
 }
 
-export default function FormBuilderPage() {
+function FormBuilderContent() {
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const template = searchParams.get("template") || "default"
+
+  // Define template presets
+  const getInitialElements = (): FormElement[] => {
+    if (template === "blank") {
+      return [
+        {
+          id: "heading",
+          elementType: "text",
+          content: "Your heading here",
+          fontFamily: "Arial",
+          fontWeight: "400",
+          fontSize: "32",
+          fontColor: "#000000",
+          lineHeight: "1.2",
+          letterSpacing: "0",
+          textAlign: "left",
+        },
+      ]
+    }
+
+    // Default template
+    return [
+      {
+        id: "main-image",
+        elementType: "image",
+        url: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/text-editor-q4PVzyjDcuig9i4hLmgvReaMzJ8hhm.png",
+        alt: "Decorative image",
+        width: "50",
+        height: "100",
+        borderRadius: "0",
+        position: "left",
+        opacity: "100",
+      },
+      {
+        id: "heading",
+        elementType: "text",
+        content: "Unleash your genius",
+        fontFamily: "Georgia",
+        fontWeight: "400",
+        fontSize: "48",
+        fontColor: "#494D3E",
+        lineHeight: "1.2",
+        letterSpacing: "0",
+        textAlign: "left",
+      },
+      {
+        id: "description",
+        elementType: "text",
+        content: "Wondering how to take your creative talent and turn it into a scalable business? You're in good hands, friend. Sign up below to receive my 100% free step-by-step guide on how to launch and grow a creative business that celebrates your genius.",
+        fontFamily: "Arial",
+        fontWeight: "400",
+        fontSize: "14",
+        fontColor: "#6B7280",
+        lineHeight: "1.5",
+        letterSpacing: "0",
+        textAlign: "left",
+      },
+      {
+        id: "field-1",
+        elementType: "field",
+        type: "text",
+        placeholder: "FIRST NAME",
+        label: "FIRST NAME",
+        required: false,
+        fillColor: "transparent",
+        borderColor: "#1F2937",
+        borderWidth: "2",
+        borderRadius: "999",
+        height: "48",
+        fontFamily: "Arial",
+        fontWeight: "400",
+        fontSize: "14",
+        fontColor: "#1F2937",
+        lineHeight: "1",
+        letterSpacing: "0",
+        textAlign: "left",
+      },
+      {
+        id: "field-2",
+        elementType: "field",
+        type: "email",
+        placeholder: "EMAIL ADDRESS",
+        label: "EMAIL ADDRESS",
+        required: false,
+        fillColor: "transparent",
+        borderColor: "#1F2937",
+        borderWidth: "2",
+        borderRadius: "999",
+        height: "48",
+        fontFamily: "Arial",
+        fontWeight: "400",
+        fontSize: "14",
+        fontColor: "#1F2937",
+        lineHeight: "1",
+        letterSpacing: "0",
+        textAlign: "left",
+      },
+      {
+        id: "download-button",
+        elementType: "button",
+        label: "DOWNLOAD",
+        fillColor: "#494D3E",
+        borderColor: "transparent",
+        borderWidth: "0",
+        borderRadius: "999",
+        height: "48",
+        width: "100",
+        fontFamily: "Arial",
+        fontWeight: "500",
+        fontSize: "14",
+        fontColor: "#FFFFFF",
+        lineHeight: "1",
+        letterSpacing: "1",
+        textAlign: "center",
+      },
+    ]
+  }
+
   const [selectedElement, setSelectedElement] = useState<ElementType>("text")
   const [selectedElementId, setSelectedElementId] = useState<string>("heading")
   const [activeTab, setActiveTab] = useState<"fields" | "style" | "font">("font")
@@ -107,101 +229,7 @@ export default function FormBuilderPage() {
   const [addMenuPosition, setAddMenuPosition] = useState<number | null>(null)
   const [editingElementId, setEditingElementId] = useState<string | null>(null)
   const [previewMode, setPreviewMode] = useState<"desktop" | "mobile">("desktop")
-  const [formElements, setFormElements] = useState<FormElement[]>([
-    {
-      id: "main-image",
-      elementType: "image",
-      url: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/text-editor-q4PVzyjDcuig9i4hLmgvReaMzJ8hhm.png",
-      alt: "Decorative image",
-      width: "50",
-      height: "100",
-      borderRadius: "0",
-      position: "left",
-      opacity: "100",
-    },
-    {
-      id: "heading",
-      elementType: "text",
-      content: "Unleash your genius",
-      fontFamily: "Georgia",
-      fontWeight: "400",
-      fontSize: "48",
-      fontColor: "#494D3E",
-      lineHeight: "1.2",
-      letterSpacing: "0",
-      textAlign: "left",
-    },
-    {
-      id: "description",
-      elementType: "text",
-      content: "Wondering how to take your creative talent and turn it into a scalable business? You're in good hands, friend. Sign up below to receive my 100% free step-by-step guide on how to launch and grow a creative business that celebrates your genius.",
-      fontFamily: "Arial",
-      fontWeight: "400",
-      fontSize: "14",
-      fontColor: "#6B7280",
-      lineHeight: "1.5",
-      letterSpacing: "0",
-      textAlign: "left",
-    },
-    {
-      id: "field-1",
-      elementType: "field",
-      type: "text",
-      placeholder: "FIRST NAME",
-      label: "FIRST NAME",
-      required: false,
-      fillColor: "transparent",
-      borderColor: "#1F2937",
-      borderWidth: "2",
-      borderRadius: "999",
-      height: "48",
-      fontFamily: "Arial",
-      fontWeight: "400",
-      fontSize: "14",
-      fontColor: "#1F2937",
-      lineHeight: "1",
-      letterSpacing: "0",
-      textAlign: "left",
-    },
-    {
-      id: "field-2",
-      elementType: "field",
-      type: "email",
-      placeholder: "EMAIL ADDRESS",
-      label: "EMAIL ADDRESS",
-      required: false,
-      fillColor: "transparent",
-      borderColor: "#1F2937",
-      borderWidth: "2",
-      borderRadius: "999",
-      height: "48",
-      fontFamily: "Arial",
-      fontWeight: "400",
-      fontSize: "14",
-      fontColor: "#1F2937",
-      lineHeight: "1",
-      letterSpacing: "0",
-      textAlign: "left",
-    },
-    {
-      id: "download-button",
-      elementType: "button",
-      label: "DOWNLOAD",
-      fillColor: "#494D3E",
-      borderColor: "transparent",
-      borderWidth: "0",
-      borderRadius: "999",
-      height: "48",
-      width: "100",
-      fontFamily: "Arial",
-      fontWeight: "500",
-      fontSize: "14",
-      fontColor: "#FFFFFF",
-      lineHeight: "1",
-      letterSpacing: "1",
-      textAlign: "center",
-    },
-  ])
+  const [formElements, setFormElements] = useState<FormElement[]>(getInitialElements())
 
   // History management for undo/redo
   const [history, setHistory] = useState<FormElement[][]>([])
@@ -542,7 +570,17 @@ export default function FormBuilderPage() {
     <div className="flex h-screen flex-col bg-white">
       {/* Header */}
       <header className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
-        <div className="text-sm font-bold tracking-wide">FORM BUILDER</div>
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => router.push("/dashboard")}
+            className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Dashboard
+          </button>
+          <div className="h-6 w-px bg-gray-300" />
+          <div className="text-sm font-bold tracking-wide">FORM BUILDER</div>
+        </div>
 
         <div className="flex items-center gap-8">
           <button className="text-sm font-medium text-gray-900">Design</button>
@@ -2011,5 +2049,22 @@ export default function FormBuilderPage() {
         </DialogContent>
       </Dialog>
     </div>
+  )
+}
+
+export default function FormBuilderPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex h-screen items-center justify-center bg-white">
+        <div className="text-center">
+          <div className="mb-4 text-sm font-bold tracking-wide text-gray-400">FORM BUILDER</div>
+          <div className="h-1 w-32 bg-gray-200 rounded-full overflow-hidden">
+            <div className="h-full w-1/2 bg-gray-400 animate-pulse"></div>
+          </div>
+        </div>
+      </div>
+    }>
+      <FormBuilderContent />
+    </Suspense>
   )
 }
