@@ -9,12 +9,13 @@ interface ColorPickerProps {
 }
 
 export function ColorPicker({ color, onChange }: ColorPickerProps) {
-  const [hue, setHue] = useState(240)
+  const [selectedBaseColor, setSelectedBaseColor] = useState("#3B82F6") // Cor base selecionada da paleta
+  const [lightness, setLightness] = useState(50) // Intensidade/claridade (0-100)
   const [selectedColor, setSelectedColor] = useState(color)
   const [hexValue, setHexValue] = useState(color)
-  const [isDraggingHue, setIsDraggingHue] = useState(false)
+  const [isDraggingLightness, setIsDraggingLightness] = useState(false)
 
-  const hueRef = useRef<HTMLDivElement>(null)
+  const lightnessRef = useRef<HTMLDivElement>(null)
 
   // Color palette - 7 rows x 5 columns = 35 colors
   const colorPalette = [
@@ -34,23 +35,46 @@ export function ColorPicker({ color, onChange }: ColorPickerProps) {
     "#D7ABA2", "#5F9EA0", "#991B1B", "#E8A87C", "#FDE047",
   ]
 
-  // Convert HSL to Hex
-  const hslToHex = (h: number, s: number, l: number) => {
-    l /= 100
-    const a = (s * Math.min(l, 1 - l)) / 100
-    const f = (n: number) => {
-      const k = (n + h / 30) % 12
-      const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1)
-      return Math.round(255 * color)
-        .toString(16)
-        .padStart(2, "0")
-    }
-    return `#${f(0)}${f(8)}${f(4)}`.toUpperCase()
+  // Convert Hex to RGB
+  const hexToRgb = (hex: string) => {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
+    return result ? {
+      r: parseInt(result[1], 16),
+      g: parseInt(result[2], 16),
+      b: parseInt(result[3], 16)
+    } : { r: 0, g: 0, b: 0 }
   }
 
-  // Generate color from hue
-  const getColorFromHue = (h: number) => {
-    return hslToHex(h, 70, 65)
+  // Convert RGB to Hex
+  const rgbToHex = (r: number, g: number, b: number) => {
+    return "#" + [r, g, b].map(x => {
+      const hex = Math.round(x).toString(16)
+      return hex.length === 1 ? "0" + hex : hex
+    }).join("").toUpperCase()
+  }
+
+  // Apply lightness to base color
+  const applyLightness = (baseColor: string, lightnessValue: number) => {
+    const rgb = hexToRgb(baseColor)
+
+    // lightnessValue: 0 = preto, 50 = cor original, 100 = branco
+    let r, g, b
+
+    if (lightnessValue < 50) {
+      // Escurecer (interpolar com preto)
+      const factor = lightnessValue / 50
+      r = rgb.r * factor
+      g = rgb.g * factor
+      b = rgb.b * factor
+    } else {
+      // Clarear (interpolar com branco)
+      const factor = (lightnessValue - 50) / 50
+      r = rgb.r + (255 - rgb.r) * factor
+      g = rgb.g + (255 - rgb.g) * factor
+      b = rgb.b + (255 - rgb.b) * factor
+    }
+
+    return rgbToHex(r, g, b)
   }
 
   // Initialize from prop color
@@ -61,21 +85,21 @@ export function ColorPicker({ color, onChange }: ColorPickerProps) {
     }
   }, [color])
 
-  // Handle hue slider
-  const handleHueMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    setIsDraggingHue(true)
-    updateHue(e)
+  // Handle lightness slider
+  const handleLightnessMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    setIsDraggingLightness(true)
+    updateLightness(e)
   }
 
-  const updateHue = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!hueRef.current) return
+  const updateLightness = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!lightnessRef.current) return
 
-    const rect = hueRef.current.getBoundingClientRect()
+    const rect = lightnessRef.current.getBoundingClientRect()
     const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width))
-    const newHue = (x / rect.width) * 360
+    const newLightness = (x / rect.width) * 100
 
-    setHue(newHue)
-    const newColor = getColorFromHue(newHue)
+    setLightness(newLightness)
+    const newColor = applyLightness(selectedBaseColor, newLightness)
     setSelectedColor(newColor)
     setHexValue(newColor)
     onChange(newColor)
@@ -84,16 +108,16 @@ export function ColorPicker({ color, onChange }: ColorPickerProps) {
   // Handle mouse move
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      if (isDraggingHue) {
-        updateHue(e as any)
+      if (isDraggingLightness) {
+        updateLightness(e as any)
       }
     }
 
     const handleMouseUp = () => {
-      setIsDraggingHue(false)
+      setIsDraggingLightness(false)
     }
 
-    if (isDraggingHue) {
+    if (isDraggingLightness) {
       window.addEventListener("mousemove", handleMouseMove)
       window.addEventListener("mouseup", handleMouseUp)
 
@@ -102,7 +126,7 @@ export function ColorPicker({ color, onChange }: ColorPickerProps) {
         window.removeEventListener("mouseup", handleMouseUp)
       }
     }
-  }, [isDraggingHue])
+  }, [isDraggingLightness, selectedBaseColor])
 
   // Handle hex input
   const handleHexChange = (value: string) => {
@@ -115,6 +139,8 @@ export function ColorPicker({ color, onChange }: ColorPickerProps) {
 
   // Handle color selection from palette
   const handleColorSelect = (color: string) => {
+    setSelectedBaseColor(color)
+    setLightness(50) // Reset lightness to middle (cor original)
     setSelectedColor(color)
     setHexValue(color)
     onChange(color)
@@ -123,11 +149,11 @@ export function ColorPicker({ color, onChange }: ColorPickerProps) {
   return (
     <div className="w-full space-y-4 p-1">
       {/* Color Palette Grid */}
-      <div className="grid grid-cols-5 gap-2">
+      <div className="grid grid-cols-5 gap-2.5 justify-items-center">
         {colorPalette.map((paletteColor, index) => (
           <button
             key={index}
-            className="h-10 w-full rounded-full transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            className="h-7 w-7 rounded-full transition-all hover:scale-125 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
             style={{ backgroundColor: paletteColor }}
             onClick={() => handleColorSelect(paletteColor)}
             title={paletteColor}
@@ -135,22 +161,21 @@ export function ColorPicker({ color, onChange }: ColorPickerProps) {
         ))}
       </div>
 
-      {/* Hue Slider */}
+      {/* Lightness Slider */}
       <div
-        ref={hueRef}
+        ref={lightnessRef}
         className="relative h-6 w-full cursor-pointer rounded-full"
         style={{
-          background:
-            "linear-gradient(to right, #1E3A8A 0%, #7C3AED 16.67%, #EC4899 33.33%, #EF4444 50%, #F59E0B 66.67%, #10B981 83.33%, #1E3A8A 100%)",
+          background: `linear-gradient(to right, #000000 0%, ${selectedBaseColor} 50%, #FFFFFF 100%)`,
         }}
-        onMouseDown={handleHueMouseDown}
+        onMouseDown={handleLightnessMouseDown}
       >
-        {/* Hue Slider Thumb */}
+        {/* Lightness Slider Thumb */}
         <div
           className="absolute top-1/2 h-7 w-7 -translate-x-1/2 -translate-y-1/2 rounded-full border-3 border-white shadow-lg"
           style={{
-            left: `${(hue / 360) * 100}%`,
-            backgroundColor: getColorFromHue(hue),
+            left: `${lightness}%`,
+            backgroundColor: selectedColor,
           }}
         />
       </div>
