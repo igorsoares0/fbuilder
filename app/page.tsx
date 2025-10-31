@@ -992,7 +992,7 @@ function FormBuilderContent() {
         </div>
 
         {/* Right Sidebar - Properties Panel */}
-        <div className="w-80 border-l border-gray-200 bg-white p-6 overflow-y-auto">
+        <div className="w-80 border-l border-gray-200 bg-white p-6 pb-96 overflow-y-auto">
           {/* Form Settings Panel */}
           {showFormSettings && (
             <>
@@ -1120,6 +1120,13 @@ function FormBuilderContent() {
               <h2 className="mb-8 text-lg font-semibold">Font</h2>
 
               <div className="space-y-6">
+                {/* Font Color - MOVED TO TOP */}
+                <ColorPickerButton
+                  label="Font Color"
+                  color={((getCurrentElement() as TextElement) || {fontFamily:"Arial",fontWeight:"400",fontSize:"16",fontColor:"#000000",lineHeight:"1.5",letterSpacing:"0",textAlign:"left" as const}).fontColor}
+                  onChange={(color) => updateCurrentElement({ fontColor: color })}
+                />
+
                 {/* Font Family and Weight */}
                 <div>
                   <label className="mb-2 block text-sm font-medium text-gray-900">Font</label>
@@ -1182,13 +1189,6 @@ function FormBuilderContent() {
                     </SelectContent>
                   </Select>
                 </div>
-
-                {/* Font Color */}
-                <ColorPickerButton
-                  label="Font Color"
-                  color={((getCurrentElement() as TextElement) || {fontFamily:"Arial",fontWeight:"400",fontSize:"16",fontColor:"#000000",lineHeight:"1.5",letterSpacing:"0",textAlign:"left" as const}).fontColor}
-                  onChange={(color) => updateCurrentElement({ fontColor: color })}
-                />
 
                 {/* Alignment */}
                 <div>
@@ -1726,6 +1726,13 @@ function FormBuilderContent() {
 
               {activeTab === "font" && (
                 <div className="space-y-6">
+                  {/* Font Color - MOVED TO TOP */}
+                  <ColorPickerButton
+                    label="Font Color"
+                    color={(getCurrentElement() as FieldElement)?.fontColor || "#000000"}
+                    onChange={(color) => updateCurrentElement({ fontColor: color })}
+                  />
+
                   {/* Font Family and Weight */}
                   <div>
                     <label className="mb-2 block text-sm font-medium text-gray-900">Font</label>
@@ -1782,13 +1789,6 @@ function FormBuilderContent() {
                       </SelectContent>
                     </Select>
                   </div>
-
-                  {/* Font Color */}
-                  <ColorPickerButton
-                    label="Font Color"
-                    color={(getCurrentElement() as FieldElement)?.fontColor || "#000000"}
-                    onChange={(color) => updateCurrentElement({ fontColor: color })}
-                  />
 
                   {/* Alignment */}
                   <div>
