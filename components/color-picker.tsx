@@ -57,21 +57,21 @@ export function ColorPicker({ color, onChange }: ColorPickerProps) {
   const applyLightness = (baseColor: string, lightnessValue: number) => {
     const rgb = hexToRgb(baseColor)
 
-    // lightnessValue: 0 = preto, 50 = cor original, 100 = branco
+    // lightnessValue: 0 = branco, 50 = cor original, 100 = preto (invertido)
     let r, g, b
 
     if (lightnessValue < 50) {
-      // Escurecer (interpolar com preto)
-      const factor = lightnessValue / 50
-      r = rgb.r * factor
-      g = rgb.g * factor
-      b = rgb.b * factor
-    } else {
       // Clarear (interpolar com branco)
+      const factor = lightnessValue / 50
+      r = 255 - (255 - rgb.r) * factor
+      g = 255 - (255 - rgb.g) * factor
+      b = 255 - (255 - rgb.b) * factor
+    } else {
+      // Escurecer (interpolar com preto)
       const factor = (lightnessValue - 50) / 50
-      r = rgb.r + (255 - rgb.r) * factor
-      g = rgb.g + (255 - rgb.g) * factor
-      b = rgb.b + (255 - rgb.b) * factor
+      r = rgb.r * (1 - factor)
+      g = rgb.g * (1 - factor)
+      b = rgb.b * (1 - factor)
     }
 
     return rgbToHex(r, g, b)
@@ -149,11 +149,11 @@ export function ColorPicker({ color, onChange }: ColorPickerProps) {
   return (
     <div className="w-full space-y-4 p-1">
       {/* Color Palette Grid */}
-      <div className="grid grid-cols-5 gap-2.5 justify-items-center">
+      <div className="grid grid-cols-5 gap-2 justify-items-center">
         {colorPalette.map((paletteColor, index) => (
           <button
             key={index}
-            className="h-7 w-7 rounded-full transition-all hover:scale-125 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+            className="h-6 w-6 rounded-full transition-all hover:scale-125 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
             style={{ backgroundColor: paletteColor }}
             onClick={() => handleColorSelect(paletteColor)}
             title={paletteColor}
@@ -166,7 +166,7 @@ export function ColorPicker({ color, onChange }: ColorPickerProps) {
         ref={lightnessRef}
         className="relative h-6 w-full cursor-pointer rounded-full"
         style={{
-          background: `linear-gradient(to right, #000000 0%, ${selectedBaseColor} 50%, #FFFFFF 100%)`,
+          background: `linear-gradient(to right, #FFFFFF 0%, ${selectedBaseColor} 50%, #000000 100%)`,
         }}
         onMouseDown={handleLightnessMouseDown}
       >

@@ -25,7 +25,7 @@ export function ColorPickerButton({ color, onChange, label }: ColorPickerButtonP
             </span>
           </button>
         </PopoverTrigger>
-        <PopoverContent className="w-80" align="start">
+        <PopoverContent className="w-72" align="start">
           <ColorPicker color={color} onChange={onChange} />
         </PopoverContent>
       </Popover>
