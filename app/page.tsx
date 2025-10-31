@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Monitor, Smartphone, AlignLeft, AlignCenter, AlignRight, Upload, Plus, Type, MousePointer, Image as ImageIcon, Undo, Redo, ArrowLeft, Settings } from "lucide-react"
+import { ColorPickerButton } from "@/components/color-picker-button"
 
 type ElementType = "text" | "button" | "field" | "image" | null
 
@@ -1020,63 +1021,27 @@ function FormBuilderContent() {
 
                 {/* Solid Color */}
                 {formBackground.type === "color" && (
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-gray-900">Background Color</label>
-                    <div className="flex items-center gap-2">
-                      <Input
-                        type="text"
-                        value={formBackground.color}
-                        onChange={(e) => setFormBackground({ ...formBackground, color: e.target.value })}
-                        className="flex-1 text-sm"
-                      />
-                      <input
-                        type="color"
-                        value={formBackground.color}
-                        onChange={(e) => setFormBackground({ ...formBackground, color: e.target.value })}
-                        className="h-10 w-10 shrink-0 cursor-pointer rounded-full border border-gray-300"
-                      />
-                    </div>
-                  </div>
+                  <ColorPickerButton
+                    label="Background Color"
+                    color={formBackground.color}
+                    onChange={(color) => setFormBackground({ ...formBackground, color })}
+                  />
                 )}
 
                 {/* Gradient */}
                 {formBackground.type === "gradient" && (
                   <>
-                    <div>
-                      <label className="mb-2 block text-sm font-medium text-gray-900">Gradient From</label>
-                      <div className="flex items-center gap-2">
-                        <Input
-                          type="text"
-                          value={formBackground.gradientFrom}
-                          onChange={(e) => setFormBackground({ ...formBackground, gradientFrom: e.target.value })}
-                          className="flex-1 text-sm"
-                        />
-                        <input
-                          type="color"
-                          value={formBackground.gradientFrom}
-                          onChange={(e) => setFormBackground({ ...formBackground, gradientFrom: e.target.value })}
-                          className="h-10 w-10 shrink-0 cursor-pointer rounded-full border border-gray-300"
-                        />
-                      </div>
-                    </div>
+                    <ColorPickerButton
+                      label="Gradient From"
+                      color={formBackground.gradientFrom}
+                      onChange={(color) => setFormBackground({ ...formBackground, gradientFrom: color })}
+                    />
 
-                    <div>
-                      <label className="mb-2 block text-sm font-medium text-gray-900">Gradient To</label>
-                      <div className="flex items-center gap-2">
-                        <Input
-                          type="text"
-                          value={formBackground.gradientTo}
-                          onChange={(e) => setFormBackground({ ...formBackground, gradientTo: e.target.value })}
-                          className="flex-1 text-sm"
-                        />
-                        <input
-                          type="color"
-                          value={formBackground.gradientTo}
-                          onChange={(e) => setFormBackground({ ...formBackground, gradientTo: e.target.value })}
-                          className="h-10 w-10 shrink-0 cursor-pointer rounded-full border border-gray-300"
-                        />
-                      </div>
-                    </div>
+                    <ColorPickerButton
+                      label="Gradient To"
+                      color={formBackground.gradientTo}
+                      onChange={(color) => setFormBackground({ ...formBackground, gradientTo: color })}
+                    />
 
                     <div>
                       <label className="mb-2 block text-sm font-medium text-gray-900">Direction</label>
@@ -1219,23 +1184,11 @@ function FormBuilderContent() {
                 </div>
 
                 {/* Font Color */}
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-gray-900">Font Color</label>
-                  <div className="flex items-center gap-2">
-                    <Input
-                      type="text"
-                      value={((getCurrentElement() as TextElement) || {fontFamily:"Arial",fontWeight:"400",fontSize:"16",fontColor:"#000000",lineHeight:"1.5",letterSpacing:"0",textAlign:"left" as const}).fontColor}
-                      onChange={(e) => updateCurrentElement({ fontColor: e.target.value })}
-                      className="flex-1 text-sm"
-                    />
-                    <input
-                      type="color"
-                      value={((getCurrentElement() as TextElement) || {fontFamily:"Arial",fontWeight:"400",fontSize:"16",fontColor:"#000000",lineHeight:"1.5",letterSpacing:"0",textAlign:"left" as const}).fontColor}
-                      onChange={(e) => updateCurrentElement({ fontColor: e.target.value })}
-                      className="h-10 w-10 shrink-0 cursor-pointer rounded-full border border-gray-300"
-                    />
-                  </div>
-                </div>
+                <ColorPickerButton
+                  label="Font Color"
+                  color={((getCurrentElement() as TextElement) || {fontFamily:"Arial",fontWeight:"400",fontSize:"16",fontColor:"#000000",lineHeight:"1.5",letterSpacing:"0",textAlign:"left" as const}).fontColor}
+                  onChange={(color) => updateCurrentElement({ fontColor: color })}
+                />
 
                 {/* Alignment */}
                 <div>
@@ -1349,42 +1302,18 @@ function FormBuilderContent() {
               {activeTab === "style" && (
                 <div className="space-y-6">
                   {/* Fill Color */}
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-gray-900">Fill color</label>
-                    <div className="flex items-center gap-2">
-                      <Input
-                        type="text"
-                        value={(getCurrentElement() as ButtonElement)?.fillColor || "#000000"}
-                        onChange={(e) => updateCurrentElement({ fillColor: e.target.value })}
-                        className="flex-1 text-sm"
-                      />
-                      <input
-                        type="color"
-                        value={(getCurrentElement() as ButtonElement)?.fillColor || "#000000"}
-                        onChange={(e) => updateCurrentElement({ fillColor: e.target.value })}
-                        className="h-10 w-10 shrink-0 cursor-pointer rounded-full border border-gray-300"
-                      />
-                    </div>
-                  </div>
+                  <ColorPickerButton
+                    label="Fill color"
+                    color={(getCurrentElement() as ButtonElement)?.fillColor || "#000000"}
+                    onChange={(color) => updateCurrentElement({ fillColor: color })}
+                  />
 
                   {/* Border Color */}
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-gray-900">Border color</label>
-                    <div className="flex items-center gap-2">
-                      <Input
-                        type="text"
-                        value={(getCurrentElement() as ButtonElement)?.borderColor || "#000000"}
-                        onChange={(e) => updateCurrentElement({ borderColor: e.target.value })}
-                        className="flex-1 text-sm"
-                      />
-                      <input
-                        type="color"
-                        value={(getCurrentElement() as ButtonElement)?.borderColor || "#000000"}
-                        onChange={(e) => updateCurrentElement({ borderColor: e.target.value })}
-                        className="h-10 w-10 shrink-0 cursor-pointer rounded-full border border-gray-300"
-                      />
-                    </div>
-                  </div>
+                  <ColorPickerButton
+                    label="Border color"
+                    color={(getCurrentElement() as ButtonElement)?.borderColor || "#000000"}
+                    onChange={(color) => updateCurrentElement({ borderColor: color })}
+                  />
 
                   {/* Border Width */}
                   <div>
@@ -1536,23 +1465,11 @@ function FormBuilderContent() {
                   </div>
 
                   {/* Font Color */}
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-gray-900">Font Color</label>
-                    <div className="flex items-center gap-2">
-                      <Input
-                        type="text"
-                        value={(getCurrentElement() as ButtonElement)?.fontColor || "#FFFFFF"}
-                        onChange={(e) => updateCurrentElement({ fontColor: e.target.value })}
-                        className="flex-1 text-sm"
-                      />
-                      <input
-                        type="color"
-                        value={(getCurrentElement() as ButtonElement)?.fontColor || "#FFFFFF"}
-                        onChange={(e) => updateCurrentElement({ fontColor: e.target.value })}
-                        className="h-10 w-10 shrink-0 cursor-pointer rounded-full border border-gray-300"
-                      />
-                    </div>
-                  </div>
+                  <ColorPickerButton
+                    label="Font Color"
+                    color={(getCurrentElement() as ButtonElement)?.fontColor || "#FFFFFF"}
+                    onChange={(color) => updateCurrentElement({ fontColor: color })}
+                  />
 
                   {/* Alignment */}
                   <div>
@@ -1729,42 +1646,18 @@ function FormBuilderContent() {
               {activeTab === "style" && (
                 <div className="space-y-6">
                   {/* Fill Color */}
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-gray-900">Fill color</label>
-                    <div className="flex items-center gap-2">
-                      <Input
-                        type="text"
-                        value={(getCurrentElement() as FieldElement)?.fillColor || "transparent"}
-                        onChange={(e) => updateCurrentElement({ fillColor: e.target.value })}
-                        className="flex-1 text-sm"
-                      />
-                      <input
-                        type="color"
-                        value={(getCurrentElement() as FieldElement)?.fillColor === "transparent" ? "#ffffff" : (getCurrentElement() as FieldElement)?.fillColor}
-                        onChange={(e) => updateCurrentElement({ fillColor: e.target.value })}
-                        className="h-10 w-10 shrink-0 cursor-pointer rounded-full border border-gray-300"
-                      />
-                    </div>
-                  </div>
+                  <ColorPickerButton
+                    label="Fill color"
+                    color={(getCurrentElement() as FieldElement)?.fillColor === "transparent" ? "#ffffff" : (getCurrentElement() as FieldElement)?.fillColor || "#ffffff"}
+                    onChange={(color) => updateCurrentElement({ fillColor: color })}
+                  />
 
                   {/* Border Color */}
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-gray-900">Border color</label>
-                    <div className="flex items-center gap-2">
-                      <Input
-                        type="text"
-                        value={(getCurrentElement() as FieldElement)?.borderColor || "#000000"}
-                        onChange={(e) => updateCurrentElement({ borderColor: e.target.value })}
-                        className="flex-1 text-sm"
-                      />
-                      <input
-                        type="color"
-                        value={(getCurrentElement() as FieldElement)?.borderColor || "#000000"}
-                        onChange={(e) => updateCurrentElement({ borderColor: e.target.value })}
-                        className="h-10 w-10 shrink-0 cursor-pointer rounded-full border border-gray-300"
-                      />
-                    </div>
-                  </div>
+                  <ColorPickerButton
+                    label="Border color"
+                    color={(getCurrentElement() as FieldElement)?.borderColor || "#000000"}
+                    onChange={(color) => updateCurrentElement({ borderColor: color })}
+                  />
 
                   {/* Border Width */}
                   <div>
@@ -1891,23 +1784,11 @@ function FormBuilderContent() {
                   </div>
 
                   {/* Font Color */}
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-gray-900">Font Color</label>
-                    <div className="flex items-center gap-2">
-                      <Input
-                        type="text"
-                        value={(getCurrentElement() as FieldElement)?.fontColor || "#000000"}
-                        onChange={(e) => updateCurrentElement({ fontColor: e.target.value })}
-                        className="flex-1 text-sm"
-                      />
-                      <input
-                        type="color"
-                        value={(getCurrentElement() as FieldElement)?.fontColor || "#000000"}
-                        onChange={(e) => updateCurrentElement({ fontColor: e.target.value })}
-                        className="h-10 w-10 shrink-0 cursor-pointer rounded-full border border-gray-300"
-                      />
-                    </div>
-                  </div>
+                  <ColorPickerButton
+                    label="Font Color"
+                    color={(getCurrentElement() as FieldElement)?.fontColor || "#000000"}
+                    onChange={(color) => updateCurrentElement({ fontColor: color })}
+                  />
 
                   {/* Alignment */}
                   <div>
