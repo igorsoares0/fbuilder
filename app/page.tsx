@@ -12,6 +12,23 @@ import { ColorPickerButton } from "@/components/color-picker-button"
 
 type ElementType = "text" | "button" | "field" | "image" | null
 
+// Helper function to format relative time
+const formatRelativeTime = (date: Date): string => {
+  const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000)
+
+  if (seconds < 10) return 'just now'
+  if (seconds < 60) return `${seconds}s ago`
+
+  const minutes = Math.floor(seconds / 60)
+  if (minutes < 60) return `${minutes}m ago`
+
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return `${hours}h ago`
+
+  const days = Math.floor(hours / 24)
+  return `${days}d ago`
+}
+
 interface TextElement {
   id: string
   elementType: "text"
@@ -105,6 +122,7 @@ function FormBuilderContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const template = searchParams.get("template") || "default"
+  const formId = searchParams.get("id")
 
   // Define template presets
   const getInitialElements = (): FormElement[] => {
@@ -230,8 +248,12 @@ function FormBuilderContent() {
   const [addMenuPosition, setAddMenuPosition] = useState<number | null>(null)
   const [editingElementId, setEditingElementId] = useState<string | null>(null)
   const [previewMode, setPreviewMode] = useState<"desktop" | "mobile">("desktop")
-  const [formElements, setFormElements] = useState<FormElement[]>(getInitialElements())
+  const [formElements, setFormElements] = useState<FormElement[]>([])
   const [showFormSettings, setShowFormSettings] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSaving, setIsSaving] = useState(false)
+  const [lastSaved, setLastSaved] = useState<Date | null>(null)
+  const [formTitle, setFormTitle] = useState("Untitled Form")
 
   // Form background settings
   const [formBackground, setFormBackground] = useState({
@@ -389,6 +411,75 @@ function FormBuilderContent() {
     setFormElements(
       formElements.map((el) => (el.id === selectedElementId ? { ...el, ...updates } as FormElement : el))
     )
+  }
+
+  // Load form data on mount
+  useEffect(() => {
+    const loadForm = async () => {
+      if (formId) {
+        // Load existing form
+        try {
+          setIsLoading(true)
+          const response = await fetch(`/api/forms/${formId}`)
+
+          if (!response.ok) throw new Error('Failed to load form')
+
+          const form = await response.json()
+          setFormTitle(form.title)
+          setFormElements(form.elements)
+          setFormBackground(form.background)
+        } catch (error) {
+          console.error('Error loading form:', error)
+          alert('Failed to load form. Redirecting to dashboard...')
+          router.push('/dashboard')
+        } finally {
+          setIsLoading(false)
+        }
+      } else {
+        // New form - use template
+        setFormElements(getInitialElements())
+        setIsLoading(false)
+      }
+    }
+
+    loadForm()
+  }, [formId])
+
+  // Autosave - debounced save after changes
+  useEffect(() => {
+    if (!formId || isLoading) return // Don't autosave if no formId or still loading
+
+    const timer = setTimeout(async () => {
+      await saveForm()
+    }, 2000) // 2 second debounce
+
+    return () => clearTimeout(timer)
+  }, [formElements, formBackground, formTitle, formId, isLoading])
+
+  // Save function
+  const saveForm = async () => {
+    if (!formId) return
+
+    try {
+      setIsSaving(true)
+      const response = await fetch(`/api/forms/${formId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: formTitle,
+          elements: formElements,
+          background: formBackground,
+        }),
+      })
+
+      if (!response.ok) throw new Error('Failed to save form')
+
+      setLastSaved(new Date())
+    } catch (error) {
+      console.error('Error saving form:', error)
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   // Track changes to formElements for undo/redo
@@ -583,6 +674,18 @@ function FormBuilderContent() {
     setEditingElementId(null)
   }
 
+  // Show loading state while form is loading
+  if (isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-white">
+        <div className="text-center">
+          <div className="h-12 w-12 animate-spin rounded-full border-4 border-gray-200 border-t-black mx-auto"></div>
+          <p className="mt-4 text-sm text-gray-500">Loading form...</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="flex h-screen flex-col bg-white">
       {/* Header */}
@@ -668,7 +771,13 @@ function FormBuilderContent() {
               previewMode === "mobile" ? "text-blue-500" : "text-gray-400"
             }`} />
           </button>
-          <Button className="bg-black px-8 py-2 text-sm font-medium text-white hover:bg-gray-900">SAVE</Button>
+          <Button
+            onClick={saveForm}
+            disabled={isSaving || !formId}
+            className="bg-black px-8 py-2 text-sm font-medium text-white hover:bg-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isSaving ? "Saving..." : lastSaved ? `Saved ${formatRelativeTime(lastSaved)}` : "SAVE"}
+          </Button>
         </div>
       </header>
 

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -31,85 +31,107 @@ import {
 interface FormData {
   id: string
   title: string
-  description: string
-  responses: number
+  description: string | null
+  slug: string | null
+  status: "PUBLISHED" | "DRAFT" | "ARCHIVED"
   views: number
-  conversionRate: number
-  lastEdited: string
-  status: "published" | "draft"
+  submissions: number
+  createdAt: string
+  updatedAt: string
+  publishedAt: string | null
+  _count: {
+    responses: number
+  }
 }
 
 export default function DashboardPage() {
   const router = useRouter()
   const [searchQuery, setSearchQuery] = useState("")
   const [showTemplateDialog, setShowTemplateDialog] = useState(false)
-  const [forms, setForms] = useState<FormData[]>([
-    {
-      id: "1",
-      title: "Newsletter Signup",
-      description: "Main landing page newsletter form",
-      responses: 1284,
-      views: 4821,
-      conversionRate: 26.6,
-      lastEdited: "2 hours ago",
-      status: "published",
-    },
-    {
-      id: "2",
-      title: "Contact Form",
-      description: "General contact inquiry form",
-      responses: 342,
-      views: 1205,
-      conversionRate: 28.4,
-      lastEdited: "1 day ago",
-      status: "published",
-    },
-    {
-      id: "3",
-      title: "Product Waitlist",
-      description: "Early access signup for new product",
-      responses: 89,
-      views: 256,
-      conversionRate: 34.8,
-      lastEdited: "3 days ago",
-      status: "draft",
-    },
-    {
-      id: "4",
-      title: "Free Guide Download",
-      description: "Lead magnet for creative business guide",
-      responses: 756,
-      views: 2341,
-      conversionRate: 32.3,
-      lastEdited: "5 days ago",
-      status: "published",
-    },
-  ])
+  const [forms, setForms] = useState<FormData[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
-  const totalResponses = forms.reduce((acc, form) => acc + form.responses, 0)
+  // Load forms on mount
+  useEffect(() => {
+    loadForms()
+  }, [])
+
+  const loadForms = async () => {
+    try {
+      setIsLoading(true)
+      const response = await fetch('/api/forms')
+      if (!response.ok) throw new Error('Failed to fetch forms')
+      const data = await response.json()
+      setForms(data)
+    } catch (error) {
+      console.error('Error loading forms:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const totalResponses = forms.reduce((acc, form) => acc + form.submissions, 0)
   const totalViews = forms.reduce((acc, form) => acc + form.views, 0)
 
   const filteredForms = forms.filter(
     (form) =>
       form.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      form.description.toLowerCase().includes(searchQuery.toLowerCase())
+      (form.description && form.description.toLowerCase().includes(searchQuery.toLowerCase()))
   )
 
-  const handleCreateForm = (template: "default" | "blank") => {
-    setShowTemplateDialog(false)
-    router.push(`/?template=${template}`)
+  const handleCreateForm = async (template: "default" | "blank") => {
+    try {
+      const response = await fetch('/api/forms', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: 'Untitled Form',
+          template,
+        }),
+      })
+
+      if (!response.ok) throw new Error('Failed to create form')
+
+      const newForm = await response.json()
+      setShowTemplateDialog(false)
+      router.push(`/?id=${newForm.id}`)
+    } catch (error) {
+      console.error('Error creating form:', error)
+      alert('Failed to create form. Please try again.')
+    }
   }
 
   const handleEditForm = (formId: string) => {
     router.push(`/?id=${formId}`)
   }
 
-  const handleDuplicateForm = (formId: string) => {
-    console.log("Duplicating form:", formId)
+  const handleDuplicateForm = async (formId: string) => {
+    try {
+      // For now, just log - we can implement duplicate later
+      console.log("Duplicating form:", formId)
+      alert('Duplicate feature coming soon!')
+    } catch (error) {
+      console.error('Error duplicating form:', error)
+    }
   }
 
-  const handleDeleteForm = (formId: string) => {
-    setForms(forms.filter((form) => form.id !== formId))
+  const handleDeleteForm = async (formId: string) => {
+    if (!confirm('Are you sure you want to delete this form? This action cannot be undone.')) {
+      return
+    }
+
+    try {
+      const response = await fetch(`/api/forms/${formId}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) throw new Error('Failed to delete form')
+
+      setForms(forms.filter((form) => form.id !== formId))
+    } catch (error) {
+      console.error('Error deleting form:', error)
+      alert('Failed to delete form. Please try again.')
+    }
   }
 
   const handleViewLive = (formId: string) => {
@@ -209,7 +231,14 @@ export default function DashboardPage() {
 
           {/* Forms List */}
           <div className="space-y-3">
-            {filteredForms.map((form) => (
+            {isLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="text-center">
+                  <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-black mx-auto"></div>
+                  <p className="mt-4 text-sm text-gray-500">Loading forms...</p>
+                </div>
+              </div>
+            ) : filteredForms.map((form) => (
               <Card
                 key={form.id}
                 className="group cursor-pointer border-0 bg-white p-5 shadow-sm transition-all hover:shadow-md"
@@ -227,11 +256,11 @@ export default function DashboardPage() {
                         <div className="flex items-center gap-1">
                           <Circle
                             className={`h-2 w-2 fill-current ${
-                              form.status === "published" ? "text-green-500" : "text-gray-400"
+                              form.status === "PUBLISHED" ? "text-green-500" : "text-gray-400"
                             }`}
                           />
                           <span className="text-xs text-gray-500">
-                            {form.status === "published" ? "Published" : "Draft"}
+                            {form.status === "PUBLISHED" ? "Published" : form.status === "DRAFT" ? "Draft" : "Archived"}
                           </span>
                         </div>
                       </div>
@@ -247,11 +276,13 @@ export default function DashboardPage() {
                         <p className="text-xs text-gray-500">Views</p>
                       </div>
                       <div className="text-center">
-                        <p className="font-semibold text-gray-900">{form.responses.toLocaleString()}</p>
+                        <p className="font-semibold text-gray-900">{form.submissions.toLocaleString()}</p>
                         <p className="text-xs text-gray-500">Responses</p>
                       </div>
                       <div className="text-center">
-                        <p className="font-semibold text-gray-900">{form.conversionRate}%</p>
+                        <p className="font-semibold text-gray-900">
+                          {form.views > 0 ? Math.round((form.submissions / form.views) * 100) : 0}%
+                        </p>
                         <p className="text-xs text-gray-500">Rate</p>
                       </div>
                     </div>
@@ -307,7 +338,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Empty State */}
-          {filteredForms.length === 0 && (
+          {!isLoading && filteredForms.length === 0 && (
             <Card className="border-0 bg-white p-16 text-center shadow-sm">
               <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
                 <FileText className="h-8 w-8 text-gray-400" />

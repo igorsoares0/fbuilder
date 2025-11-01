@@ -1,0 +1,76 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x", "windows"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// FORMS
+// ============================================
+
+model Form {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  slug        String?  @unique // For public URLs: /f/my-form
+  status      FormStatus @default(DRAFT)
+
+  // Form Structure (JSON storage for flexibility)
+  elements    Json     // Array of FormElement objects
+  background  Json     // Background settings object
+
+  // Analytics & Tracking
+  views       Int      @default(0)
+  submissions Int      @default(0)
+
+  // Timestamps
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  publishedAt DateTime?
+
+  // Relations
+  responses   FormResponse[]
+
+  @@index([slug])
+  @@index([status])
+  @@map("forms")
+}
+
+enum FormStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+// ============================================
+// FORM RESPONSES
+// ============================================
+
+model FormResponse {
+  id          String   @id @default(cuid())
+  formId      String
+
+  // Response Data (JSON for flexibility with dynamic fields)
+  data        Json     // Object with field IDs as keys
+
+  // Tracking
+  ipAddress   String?
+  userAgent   String?
+
+  // Timestamps
+  submittedAt DateTime @default(now())
+
+  // Relations
+  form        Form     @relation(fields: [formId], references: [id], onDelete: Cascade)
+
+  @@index([formId])
+  @@index([submittedAt])
+  @@map("form_responses")
+}
