@@ -857,7 +857,18 @@ function FormBuilderContent() {
                     )}
 
                     {element.elementType === "field" && (
-                      <>
+                      <div className="w-full">
+                        {element.label && (
+                          <label
+                            className="mb-2 block text-sm font-medium"
+                            style={{
+                              fontFamily: element.fontFamily,
+                              color: element.fontColor,
+                            }}
+                          >
+                            {element.label}
+                          </label>
+                        )}
                         <style dangerouslySetInnerHTML={{__html: `
                           .field-input-${element.id} {
                             color: ${element.fontColor} !important;
@@ -892,7 +903,7 @@ function FormBuilderContent() {
                           }}
                           onClick={() => handleSelectElement("field", element.id)}
                         />
-                      </>
+                      </div>
                     )}
 
                     {element.elementType === "button" && (
