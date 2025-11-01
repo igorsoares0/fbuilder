@@ -47,7 +47,7 @@ interface ButtonElement {
 interface FieldElement {
   id: string
   elementType: "field"
-  type: "text" | "email"
+  type: "text" | "email" | "checkbox"
   placeholder: string
   label: string
   required: boolean
@@ -81,7 +81,7 @@ type FormElement = TextElement | ButtonElement | FieldElement | ImageElement
 
 interface FormField {
   id: string
-  type: "text" | "email"
+  type: "text" | "email" | "checkbox"
   placeholder: string
   label: string
   required: boolean
@@ -858,51 +858,86 @@ function FormBuilderContent() {
 
                     {element.elementType === "field" && (
                       <div className="w-full">
-                        {element.label && (
-                          <label
-                            className="mb-2 block text-sm font-medium"
-                            style={{
-                              fontFamily: element.fontFamily,
-                              color: element.fontColor,
-                            }}
+                        {element.type === "checkbox" ? (
+                          <div
+                            className={`flex items-center gap-3 cursor-pointer ${
+                              selectedElement === "field" && selectedElementId === element.id
+                                ? "ring-4 ring-blue-500 ring-offset-2 rounded p-2"
+                                : ""
+                            }`}
+                            onClick={() => handleSelectElement("field", element.id)}
                           >
-                            {element.label}
-                          </label>
+                            <Checkbox
+                              id={element.id}
+                              style={{
+                                borderColor: element.borderColor,
+                                borderWidth: `${element.borderWidth}px`,
+                              }}
+                            />
+                            {element.label && (
+                              <label
+                                htmlFor={element.id}
+                                className="text-sm font-medium cursor-pointer"
+                                style={{
+                                  fontFamily: element.fontFamily,
+                                  fontWeight: element.fontWeight,
+                                  fontSize: `${element.fontSize}px`,
+                                  color: element.fontColor,
+                                }}
+                              >
+                                {element.label}
+                              </label>
+                            )}
+                          </div>
+                        ) : (
+                          <>
+                            {element.label && (
+                              <label
+                                className="mb-2 block text-sm font-medium"
+                                style={{
+                                  fontFamily: element.fontFamily,
+                                  color: element.fontColor,
+                                }}
+                              >
+                                {element.label}
+                              </label>
+                            )}
+                            <style dangerouslySetInnerHTML={{__html: `
+                              .field-input-${element.id} {
+                                color: ${element.fontColor} !important;
+                              }
+                              .field-input-${element.id}::placeholder {
+                                color: ${element.fontColor} !important;
+                                opacity: 0.5;
+                              }
+                            `}} />
+                            <Input
+                              type={element.type}
+                              placeholder={element.placeholder}
+                              required={element.required}
+                              className={`field-input-${element.id} w-full cursor-pointer px-6 transition-all ${
+                                selectedElement === "field" && selectedElementId === element.id
+                                  ? "ring-4 ring-blue-500 ring-offset-2"
+                                  : ""
+                              }`}
+                              style={{
+                                backgroundColor: element.fillColor,
+                                borderColor: element.borderColor,
+                                borderWidth: `${element.borderWidth}px`,
+                                borderStyle: "solid",
+                                borderRadius: `${element.borderRadius}px`,
+                                height: `${element.height}px`,
+                                fontFamily: element.fontFamily,
+                                fontWeight: element.fontWeight,
+                                fontSize: `${element.fontSize}px`,
+                                lineHeight: element.lineHeight,
+                                letterSpacing: `${element.letterSpacing}px`,
+                                textAlign: element.textAlign,
+                              }}
+                              onClick={() => handleSelectElement("field", element.id)}
+                            />
+                          </>
                         )}
-                        <style dangerouslySetInnerHTML={{__html: `
-                          .field-input-${element.id} {
-                            color: ${element.fontColor} !important;
-                          }
-                          .field-input-${element.id}::placeholder {
-                            color: ${element.fontColor} !important;
-                            opacity: 0.5;
-                          }
-                        `}} />
-                        <Input
-                          type={element.type}
-                          placeholder={element.placeholder}
-                          required={element.required}
-                          className={`field-input-${element.id} w-full cursor-pointer px-6 transition-all ${
-                            selectedElement === "field" && selectedElementId === element.id
-                              ? "ring-4 ring-blue-500 ring-offset-2"
-                              : ""
-                          }`}
-                          style={{
-                            backgroundColor: element.fillColor,
-                            borderColor: element.borderColor,
-                            borderWidth: `${element.borderWidth}px`,
-                            borderStyle: "solid",
-                            borderRadius: `${element.borderRadius}px`,
-                            height: `${element.height}px`,
-                            fontFamily: element.fontFamily,
-                            fontWeight: element.fontWeight,
-                            fontSize: `${element.fontSize}px`,
-                            lineHeight: element.lineHeight,
-                            letterSpacing: `${element.letterSpacing}px`,
-                            textAlign: element.textAlign,
-                          }}
-                          onClick={() => handleSelectElement("field", element.id)}
-                        />
                       </div>
                     )}
 
@@ -1606,7 +1641,7 @@ function FormBuilderContent() {
                     <label className="mb-2 block text-sm font-medium text-gray-900">Field type</label>
                     <Select
                       value={(getCurrentElement() as FieldElement)?.type || "text"}
-                      onValueChange={(value: "text" | "email") => updateCurrentElement({ type: value })}
+                      onValueChange={(value: "text" | "email" | "checkbox") => updateCurrentElement({ type: value })}
                     >
                       <SelectTrigger>
                         <SelectValue />
@@ -1614,6 +1649,7 @@ function FormBuilderContent() {
                       <SelectContent>
                         <SelectItem value="text">Text</SelectItem>
                         <SelectItem value="email">Email</SelectItem>
+                        <SelectItem value="checkbox">Checkbox</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
