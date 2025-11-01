@@ -9,7 +9,7 @@ interface ColorPickerProps {
 }
 
 export function ColorPicker({ color, onChange }: ColorPickerProps) {
-  const [selectedBaseColor, setSelectedBaseColor] = useState("#3B82F6") // Cor base selecionada da paleta
+  const [selectedBaseColor, setSelectedBaseColor] = useState(color) // Cor base selecionada da paleta
   const [lightness, setLightness] = useState(50) // Intensidade/claridade (0-100)
   const [selectedColor, setSelectedColor] = useState(color)
   const [hexValue, setHexValue] = useState(color)
@@ -79,9 +79,11 @@ export function ColorPicker({ color, onChange }: ColorPickerProps) {
 
   // Initialize from prop color
   useEffect(() => {
-    if (color && color !== selectedColor) {
+    if (color && color !== hexValue) {
+      setSelectedBaseColor(color)
       setSelectedColor(color)
       setHexValue(color)
+      setLightness(50) // Reset to middle (cor original)
     }
   }, [color])
 
