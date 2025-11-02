@@ -29,7 +29,7 @@ export async function POST(request: Request) {
     }
 
     // Get IP address and user agent from headers
-    const headersList = headers()
+    const headersList = await headers()
     const ipAddress = validatedData.ipAddress ||
       headersList.get('x-forwarded-for') ||
       headersList.get('x-real-ip') ||

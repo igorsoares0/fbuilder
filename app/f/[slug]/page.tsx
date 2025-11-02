@@ -153,182 +153,251 @@ export default function PublicFormPage() {
     )
   }
 
-  // Get background style
-  const getBackgroundStyle = () => {
-    if (form.background.type === 'color') {
-      return { backgroundColor: form.background.color }
-    } else if (form.background.type === 'gradient') {
-      return {
-        background: `linear-gradient(${form.background.gradientDirection}, ${form.background.gradientFrom}, ${form.background.gradientTo})`,
-      }
-    } else if (form.background.type === 'image' && form.background.imageUrl) {
-      return {
-        backgroundImage: `url(${form.background.imageUrl})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-      }
-    }
-    return { backgroundColor: '#EDE8E3' }
-  }
-
   return (
-    <div
-      className="flex min-h-screen items-center justify-center p-6"
-      style={getBackgroundStyle()}
-    >
-      <div className="w-full max-w-md">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {form.elements.map((element) => (
-            <div key={element.id}>
-              {element.elementType === 'text' && (
-                <div>
-                  <p
-                    style={{
-                      fontFamily: element.fontFamily,
-                      fontWeight: element.fontWeight,
-                      fontSize: `${element.fontSize}px`,
-                      color: element.fontColor,
-                      lineHeight: element.lineHeight,
-                      letterSpacing: `${element.letterSpacing}px`,
-                      textAlign: element.textAlign,
-                      whiteSpace: 'pre-wrap',
-                    }}
-                  >
-                    {element.content}
-                  </p>
-                </div>
-              )}
+    <div className="h-screen overflow-hidden bg-gray-50">
+      {(() => {
+        // Find positioned image (any image with position !== "inline")
+        const positionedImage = form.elements.find(el => el.elementType === "image" && el.position !== "inline")
+        const position = positionedImage?.position || "none"
 
-              {element.elementType === 'field' && (
-                <div>
-                  {element.type === 'checkbox' ? (
-                    <div className="flex items-center gap-3">
-                      <Checkbox
-                        id={element.id}
-                        checked={formData[element.id] || false}
-                        onCheckedChange={(checked) => handleFieldChange(element.id, checked)}
-                        style={{
-                          borderColor: element.borderColor,
-                          borderWidth: `${element.borderWidth}px`,
-                        }}
-                      />
-                      {element.label && (
-                        <label
-                          htmlFor={element.id}
-                          className="text-sm font-medium cursor-pointer"
+        // Filter elements: remove positioned image from regular flow
+        const inlineElements = form.elements.filter(el => !(el.elementType === "image" && el.position !== "inline"))
+
+        return (
+          <div
+            className={`${
+              position === "background" || position === "none" ? "relative" : "flex"
+            } h-full w-full ${
+              position === "top"
+                ? "flex-col"
+                : position === "bottom"
+                ? "flex-col-reverse"
+                : position === "right"
+                ? "flex-row-reverse"
+                : position === "left"
+                ? "flex-row"
+                : position === "background" || position === "none"
+                ? ""
+                : "flex-row"
+            }`}
+          >
+            {/* Positioned Image Section */}
+            {position === "background" && positionedImage ? (
+              <div className="absolute inset-0">
+                <img
+                  src={positionedImage.url}
+                  alt={positionedImage.alt}
+                  className="h-full w-full object-cover"
+                  style={{ opacity: parseInt(positionedImage.opacity || "100") / 100 }}
+                />
+              </div>
+            ) : position !== "none" && position !== "inline" && positionedImage ? (
+              <div
+                className="relative flex items-center justify-center flex-shrink-0"
+                style={{
+                  height:
+                    position === "top" || position === "bottom"
+                      ? `${positionedImage.height}%`
+                      : "100%",
+                  width:
+                    position === "left" || position === "right"
+                      ? `${positionedImage.width}%`
+                      : "100%",
+                }}
+              >
+                <img
+                  src={positionedImage.url}
+                  alt={positionedImage.alt}
+                  className="h-full w-full object-cover"
+                />
+              </div>
+            ) : null}
+
+            {/* Form Section */}
+            <div
+              className="flex items-center justify-center px-8 flex-1 overflow-y-auto"
+              style={{
+                ...(position === "background" || position === "none" || position === "inline"
+                  ? { width: '100%' }
+                  : {
+                      width:
+                        position === "left" || position === "right"
+                          ? `${100 - parseInt(positionedImage?.width || "50")}%`
+                          : "100%",
+                    }),
+                // Apply background settings
+                ...(form.background.type === "color" ? {
+                  backgroundColor: form.background.color,
+                } : form.background.type === "gradient" ? {
+                  background: `linear-gradient(${form.background.gradientDirection}, ${form.background.gradientFrom}, ${form.background.gradientTo})`,
+                } : form.background.type === "image" && form.background.imageUrl ? {
+                  backgroundImage: `url(${form.background.imageUrl})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  backgroundRepeat: "no-repeat",
+                } : {
+                  backgroundColor: form.background.color,
+                }),
+                ...(position === "background" ? { position: 'relative', zIndex: 10 } : {}),
+              }}
+            >
+              <div className="w-full space-y-6 py-8" style={{ maxWidth: '500px' }}>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  {inlineElements.map((element) => (
+                    <div key={element.id}>
+                      {element.elementType === 'text' && (
+                        <div>
+                          <p
+                            style={{
+                              fontFamily: element.fontFamily,
+                              fontWeight: element.fontWeight,
+                              fontSize: `${element.fontSize}px`,
+                              color: element.fontColor,
+                              lineHeight: element.lineHeight,
+                              letterSpacing: `${element.letterSpacing}px`,
+                              textAlign: element.textAlign,
+                              whiteSpace: 'pre-wrap',
+                            }}
+                          >
+                            {element.content}
+                          </p>
+                        </div>
+                      )}
+
+                      {element.elementType === 'field' && (
+                        <div>
+                          {element.type === 'checkbox' ? (
+                            <div className="flex items-center gap-3">
+                              <Checkbox
+                                id={element.id}
+                                checked={formData[element.id] || false}
+                                onCheckedChange={(checked) => handleFieldChange(element.id, checked)}
+                                style={{
+                                  borderColor: element.borderColor,
+                                  borderWidth: `${element.borderWidth}px`,
+                                }}
+                              />
+                              {element.label && (
+                                <label
+                                  htmlFor={element.id}
+                                  className="text-sm font-medium cursor-pointer"
+                                  style={{
+                                    fontFamily: element.fontFamily,
+                                    fontWeight: element.fontWeight,
+                                    fontSize: `${element.fontSize}px`,
+                                    color: element.fontColor,
+                                  }}
+                                >
+                                  {element.label}
+                                  {element.required && <span className="text-red-500 ml-1">*</span>}
+                                </label>
+                              )}
+                            </div>
+                          ) : (
+                            <>
+                              {element.label && (
+                                <label
+                                  className="mb-2 block text-sm font-medium"
+                                  style={{
+                                    fontFamily: element.fontFamily,
+                                    color: element.fontColor,
+                                  }}
+                                >
+                                  {element.label}
+                                  {element.required && <span className="text-red-500 ml-1">*</span>}
+                                </label>
+                              )}
+                              <style dangerouslySetInnerHTML={{__html: `
+                                .field-input-${element.id} {
+                                  color: ${element.fontColor} !important;
+                                }
+                                .field-input-${element.id}::placeholder {
+                                  color: ${element.fontColor} !important;
+                                  opacity: 0.5;
+                                }
+                              `}} />
+                              <Input
+                                type={element.type}
+                                placeholder={element.placeholder}
+                                value={formData[element.id] || ''}
+                                onChange={(e) => handleFieldChange(element.id, e.target.value)}
+                                required={element.required}
+                                className={`field-input-${element.id} w-full px-6`}
+                                style={{
+                                  backgroundColor: element.fillColor,
+                                  borderColor: errors[element.id] ? '#ef4444' : element.borderColor,
+                                  borderWidth: `${element.borderWidth}px`,
+                                  borderStyle: 'solid',
+                                  borderRadius: `${element.borderRadius}px`,
+                                  height: `${element.height}px`,
+                                  fontFamily: element.fontFamily,
+                                  fontWeight: element.fontWeight,
+                                  fontSize: `${element.fontSize}px`,
+                                  lineHeight: element.lineHeight,
+                                  letterSpacing: `${element.letterSpacing}px`,
+                                  textAlign: element.textAlign,
+                                }}
+                              />
+                              {errors[element.id] && (
+                                <p className="mt-1 text-sm text-red-500">{errors[element.id]}</p>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      )}
+
+                      {element.elementType === 'button' && (
+                        <Button
+                          type="submit"
+                          disabled={isSubmitting}
+                          className="transition-all hover:opacity-90"
                           style={{
+                            backgroundColor: element.fillColor,
+                            borderColor: element.borderColor,
+                            borderWidth: `${element.borderWidth}px`,
+                            borderStyle: element.borderWidth !== "0" ? "solid" : "none",
+                            borderRadius: `${element.borderRadius}px`,
+                            height: `${element.height}px`,
+                            width: `${element.width}%`,
                             fontFamily: element.fontFamily,
                             fontWeight: element.fontWeight,
                             fontSize: `${element.fontSize}px`,
                             color: element.fontColor,
+                            lineHeight: element.lineHeight,
+                            letterSpacing: `${element.letterSpacing}px`,
+                            textAlign: element.textAlign,
                           }}
                         >
-                          {element.label}
-                          {element.required && <span className="text-red-500 ml-1">*</span>}
-                        </label>
+                          {isSubmitting ? 'Submitting...' : element.label}
+                        </Button>
+                      )}
+
+                      {element.elementType === 'image' && element.position === 'inline' && (
+                        <div
+                          className="overflow-hidden"
+                          style={{
+                            width: '100%',
+                          }}
+                        >
+                          <img
+                            src={element.url}
+                            alt={element.alt}
+                            className="w-full object-cover"
+                            style={{
+                              height: `${element.height}px`,
+                              borderRadius: `${element.borderRadius}px`,
+                            }}
+                          />
+                        </div>
                       )}
                     </div>
-                  ) : (
-                    <>
-                      {element.label && (
-                        <label
-                          className="mb-2 block text-sm font-medium"
-                          style={{
-                            fontFamily: element.fontFamily,
-                            color: element.fontColor,
-                          }}
-                        >
-                          {element.label}
-                          {element.required && <span className="text-red-500 ml-1">*</span>}
-                        </label>
-                      )}
-                      <style dangerouslySetInnerHTML={{__html: `
-                        .field-input-${element.id} {
-                          color: ${element.fontColor} !important;
-                        }
-                        .field-input-${element.id}::placeholder {
-                          color: ${element.fontColor} !important;
-                          opacity: 0.5;
-                        }
-                      `}} />
-                      <Input
-                        type={element.type}
-                        placeholder={element.placeholder}
-                        value={formData[element.id] || ''}
-                        onChange={(e) => handleFieldChange(element.id, e.target.value)}
-                        required={element.required}
-                        className={`field-input-${element.id} w-full px-6`}
-                        style={{
-                          backgroundColor: element.fillColor,
-                          borderColor: errors[element.id] ? '#ef4444' : element.borderColor,
-                          borderWidth: `${element.borderWidth}px`,
-                          borderStyle: 'solid',
-                          borderRadius: `${element.borderRadius}px`,
-                          height: `${element.height}px`,
-                          fontFamily: element.fontFamily,
-                          fontWeight: element.fontWeight,
-                          fontSize: `${element.fontSize}px`,
-                          lineHeight: element.lineHeight,
-                          letterSpacing: `${element.letterSpacing}px`,
-                          textAlign: element.textAlign,
-                        }}
-                      />
-                      {errors[element.id] && (
-                        <p className="mt-1 text-sm text-red-500">{errors[element.id]}</p>
-                      )}
-                    </>
-                  )}
-                </div>
-              )}
-
-              {element.elementType === 'button' && (
-                <Button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="transition-all"
-                  style={{
-                    backgroundColor: element.fillColor,
-                    borderColor: element.borderColor,
-                    borderWidth: `${element.borderWidth}px`,
-                    borderStyle: element.borderWidth !== "0" ? "solid" : "none",
-                    borderRadius: `${element.borderRadius}px`,
-                    height: `${element.height}px`,
-                    width: `${element.width}%`,
-                    fontFamily: element.fontFamily,
-                    fontWeight: element.fontWeight,
-                    fontSize: `${element.fontSize}px`,
-                    color: element.fontColor,
-                    lineHeight: element.lineHeight,
-                    letterSpacing: `${element.letterSpacing}px`,
-                    textAlign: element.textAlign,
-                  }}
-                >
-                  {isSubmitting ? 'Submitting...' : element.label}
-                </Button>
-              )}
-
-              {element.elementType === 'image' && (
-                <div
-                  className="overflow-hidden"
-                  style={{
-                    width: element.position === 'inline' ? '100%' : `${element.width}%`,
-                  }}
-                >
-                  <img
-                    src={element.url}
-                    alt={element.alt}
-                    className="w-full object-cover"
-                    style={{
-                      height: `${element.height}px`,
-                      borderRadius: `${element.borderRadius}px`,
-                    }}
-                  />
-                </div>
-              )}
+                  ))}
+                </form>
+              </div>
             </div>
-          ))}
-        </form>
-      </div>
+          </div>
+        )
+      })()}
     </div>
   )
 }

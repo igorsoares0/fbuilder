@@ -50,6 +50,10 @@ export default function DashboardPage() {
   const [showTemplateDialog, setShowTemplateDialog] = useState(false)
   const [forms, setForms] = useState<FormData[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [showPublishDialog, setShowPublishDialog] = useState(false)
+  const [publishingForm, setPublishingForm] = useState<FormData | null>(null)
+  const [publishSlug, setPublishSlug] = useState("")
+  const [publishStatus, setPublishStatus] = useState<"PUBLISHED" | "DRAFT">("PUBLISHED")
 
   // Load forms on mount
   useEffect(() => {
@@ -136,6 +140,61 @@ export default function DashboardPage() {
 
   const handleViewLive = (formId: string) => {
     window.open(`/preview/${formId}`, "_blank")
+  }
+
+  const handleOpenPublish = (form: FormData) => {
+    setPublishingForm(form)
+    setPublishSlug(form.slug || '')
+    setPublishStatus(form.status)
+    setShowPublishDialog(true)
+  }
+
+  const handlePublish = async () => {
+    if (!publishingForm) return
+
+    // Validate slug
+    if (publishStatus === 'PUBLISHED' && !publishSlug.trim()) {
+      alert('Please enter a slug for your form')
+      return
+    }
+
+    // Validate slug format
+    if (publishStatus === 'PUBLISHED' && !/^[a-z0-9-]+$/.test(publishSlug)) {
+      alert('Slug can only contain lowercase letters, numbers, and hyphens')
+      return
+    }
+
+    try {
+      const response = await fetch(`/api/forms/${publishingForm.id}/publish`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          status: publishStatus,
+          slug: publishStatus === 'PUBLISHED' ? publishSlug : null,
+        }),
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to publish form')
+      }
+
+      const updatedForm = await response.json()
+
+      // Update form in list
+      setForms(forms.map(f => f.id === updatedForm.id ? updatedForm : f))
+
+      setShowPublishDialog(false)
+
+      if (publishStatus === 'PUBLISHED') {
+        alert(`Form published successfully! Access it at: /f/${publishSlug}`)
+      } else {
+        alert('Form unpublished successfully')
+      }
+    } catch (error: any) {
+      console.error('Error publishing form:', error)
+      alert(error.message || 'Failed to publish form. Please try again.')
+    }
   }
 
   return (
@@ -319,6 +378,13 @@ export default function DashboardPage() {
                           <ExternalLink className="mr-2 h-4 w-4" />
                           View Live
                         </DropdownMenuItem>
+                        <DropdownMenuItem onClick={(e) => {
+                          e.stopPropagation()
+                          handleOpenPublish(form)
+                        }}>
+                          <Sparkles className="mr-2 h-4 w-4" />
+                          {form.status === 'PUBLISHED' ? 'Manage Publishing' : 'Publish'}
+                        </DropdownMenuItem>
                         <DropdownMenuItem
                           className="text-red-600 focus:text-red-600"
                           onClick={(e) => {
@@ -410,6 +476,80 @@ export default function DashboardPage() {
                 </Badge>
               </div>
             </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Publish Dialog */}
+      <Dialog open={showPublishDialog} onOpenChange={setShowPublishDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Publish Form</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Status</label>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant={publishStatus === 'PUBLISHED' ? 'default' : 'outline'}
+                  onClick={() => setPublishStatus('PUBLISHED')}
+                  className="flex-1"
+                >
+                  Published
+                </Button>
+                <Button
+                  type="button"
+                  variant={publishStatus === 'DRAFT' ? 'default' : 'outline'}
+                  onClick={() => setPublishStatus('DRAFT')}
+                  className="flex-1"
+                >
+                  Draft
+                </Button>
+              </div>
+            </div>
+
+            {publishStatus === 'PUBLISHED' && (
+              <div className="space-y-2">
+                <label htmlFor="slug" className="text-sm font-medium">
+                  Form URL Slug
+                </label>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-500">/f/</span>
+                  <Input
+                    id="slug"
+                    value={publishSlug}
+                    onChange={(e) => setPublishSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
+                    placeholder="my-awesome-form"
+                    className="flex-1"
+                  />
+                </div>
+                <p className="text-xs text-gray-500">
+                  Only lowercase letters, numbers, and hyphens allowed
+                </p>
+                {publishSlug && (
+                  <p className="text-xs text-green-600">
+                    Your form will be accessible at: <span className="font-mono">/f/{publishSlug}</span>
+                  </p>
+                )}
+              </div>
+            )}
+
+            <div className="flex justify-end gap-2 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowPublishDialog(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                onClick={handlePublish}
+              >
+                {publishStatus === 'PUBLISHED' ? 'Publish' : 'Unpublish'}
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>

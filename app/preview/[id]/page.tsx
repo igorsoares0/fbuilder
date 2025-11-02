@@ -117,14 +117,96 @@ export default function PreviewFormPage() {
       </div>
 
       {/* Form Preview */}
-      <div
-        className="flex min-h-[calc(100vh-60px)] items-center justify-center p-6"
-        style={getBackgroundStyle()}
-      >
-        <div className="w-full max-w-md">
-          <div className="space-y-6">
-            {form.elements.map((element) => (
-              <div key={element.id}>
+      <div className="h-[calc(100vh-60px)] overflow-hidden bg-gray-50">
+        {(() => {
+          // Find positioned image (any image with position !== "inline")
+          const positionedImage = form.elements.find(el => el.elementType === "image" && el.position !== "inline")
+          const position = positionedImage?.position || "none"
+
+          // Filter elements: remove positioned image from regular flow
+          const inlineElements = form.elements.filter(el => !(el.elementType === "image" && el.position !== "inline"))
+
+          return (
+            <div
+              className={`${
+                position === "background" || position === "none" ? "relative" : "flex"
+              } h-full w-full ${
+                position === "top"
+                  ? "flex-col"
+                  : position === "bottom"
+                  ? "flex-col-reverse"
+                  : position === "right"
+                  ? "flex-row-reverse"
+                  : position === "left"
+                  ? "flex-row"
+                  : position === "background" || position === "none"
+                  ? ""
+                  : "flex-row"
+              }`}
+            >
+              {/* Positioned Image Section */}
+              {position === "background" && positionedImage ? (
+                <div className="absolute inset-0">
+                  <img
+                    src={positionedImage.url}
+                    alt={positionedImage.alt}
+                    className="h-full w-full object-cover"
+                    style={{ opacity: parseInt(positionedImage.opacity || "100") / 100 }}
+                  />
+                </div>
+              ) : position !== "none" && position !== "inline" && positionedImage ? (
+                <div
+                  className="relative flex items-center justify-center flex-shrink-0"
+                  style={{
+                    height:
+                      position === "top" || position === "bottom"
+                        ? `${positionedImage.height}%`
+                        : "100%",
+                    width:
+                      position === "left" || position === "right"
+                        ? `${positionedImage.width}%`
+                        : "100%",
+                  }}
+                >
+                  <img
+                    src={positionedImage.url}
+                    alt={positionedImage.alt}
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+              ) : null}
+
+              {/* Form Section */}
+              <div
+                className="flex items-center justify-center px-8 flex-1 overflow-y-auto"
+                style={{
+                  ...(position === "background" || position === "none" || position === "inline"
+                    ? { width: '100%' }
+                    : {
+                        width:
+                          position === "left" || position === "right"
+                            ? `${100 - parseInt(positionedImage?.width || "50")}%`
+                            : "100%",
+                      }),
+                  // Apply background settings
+                  ...(form.background.type === "color" ? {
+                    backgroundColor: form.background.color,
+                  } : form.background.type === "gradient" ? {
+                    background: `linear-gradient(${form.background.gradientDirection}, ${form.background.gradientFrom}, ${form.background.gradientTo})`,
+                  } : form.background.type === "image" && form.background.imageUrl ? {
+                    backgroundImage: `url(${form.background.imageUrl})`,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                    backgroundRepeat: "no-repeat",
+                  } : {
+                    backgroundColor: form.background.color,
+                  }),
+                  ...(position === "background" ? { position: 'relative', zIndex: 10 } : {}),
+                }}
+              >
+                <div className="w-full space-y-6 py-8" style={{ maxWidth: '500px' }}>
+                  {inlineElements.map((element) => (
+                    <div key={element.id}>
                 {element.elementType === 'text' && (
                   <div>
                     <p
@@ -258,10 +340,13 @@ export default function PreviewFormPage() {
                     />
                   </div>
                 )}
+                    </div>
+                  ))}
+                </div>
               </div>
-            ))}
-          </div>
-        </div>
+            </div>
+          )
+        })()}
       </div>
     </div>
   )
