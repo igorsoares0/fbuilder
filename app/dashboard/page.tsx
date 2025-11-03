@@ -20,6 +20,7 @@ import {
   Sparkles,
   FileX,
   Circle,
+  BarChart,
 } from "lucide-react"
 import {
   DropdownMenu,
@@ -377,6 +378,13 @@ export default function DashboardPage() {
                         }}>
                           <ExternalLink className="mr-2 h-4 w-4" />
                           View Live
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={(e) => {
+                          e.stopPropagation()
+                          router.push(`/forms/${form.id}/responses`)
+                        }}>
+                          <BarChart className="mr-2 h-4 w-4" />
+                          View Responses ({form.submissions})
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={(e) => {
                           e.stopPropagation()
