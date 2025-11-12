@@ -132,7 +132,7 @@ function FormBuilderContent() {
           id: "heading",
           elementType: "text",
           content: "Your heading here",
-          fontFamily: "Arial",
+          fontFamily: "Inter",
           fontWeight: "400",
           fontSize: "32",
           fontColor: "#000000",
@@ -1369,7 +1369,7 @@ function FormBuilderContent() {
                 {/* Font Color - MOVED TO TOP */}
                 <ColorPickerButton
                   label="Font Color"
-                  color={((getCurrentElement() as TextElement) || {fontFamily:"Arial",fontWeight:"400",fontSize:"16",fontColor:"#000000",lineHeight:"1.5",letterSpacing:"0",textAlign:"left" as const}).fontColor}
+                  color={((getCurrentElement() as TextElement) || {fontFamily:"Inter",fontWeight:"400",fontSize:"16",fontColor:"#000000",lineHeight:"1.5",letterSpacing:"0",textAlign:"left" as const}).fontColor}
                   onChange={(color) => updateCurrentElement({ fontColor: color })}
                 />
 
@@ -1378,22 +1378,27 @@ function FormBuilderContent() {
                   <label className="mb-2 block text-sm font-medium text-gray-900">Font</label>
                   <div className="flex gap-2">
                     <Select
-                      value={(getCurrentElement() as TextElement)?.fontFamily || "Arial"}
+                      value={(getCurrentElement() as TextElement)?.fontFamily || "Inter"}
                       onValueChange={(value) => updateCurrentElement({ fontFamily: value })}
                     >
                       <SelectTrigger className="flex-1">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Arial">Arial</SelectItem>
+                        <SelectItem value="Inter">Inter</SelectItem>
+                        <SelectItem value="Poppins">Poppins</SelectItem>
+                        <SelectItem value="Manrope">Manrope</SelectItem>
+                        <SelectItem value="Playfair Display">Playfair Display</SelectItem>
+                        <SelectItem value="Merriweather">Merriweather</SelectItem>
+                        <SelectItem value="JetBrains Mono">JetBrains Mono</SelectItem>
+                        <SelectItem value="Bebas Neue">Bebas Neue</SelectItem>
+                        <SelectItem value="Abril Fatface">Abril Fatface</SelectItem>
                         <SelectItem value="Georgia">Georgia</SelectItem>
-                        <SelectItem value="Times New Roman">Times New Roman</SelectItem>
-                        <SelectItem value="Courier New">Courier New</SelectItem>
-                        <SelectItem value="Verdana">Verdana</SelectItem>
+                        <SelectItem value="Arial">Arial</SelectItem>
                       </SelectContent>
                     </Select>
                     <Select
-                      value={((getCurrentElement() as TextElement) || {fontFamily:"Arial",fontWeight:"400",fontSize:"16",fontColor:"#000000",lineHeight:"1.5",letterSpacing:"0",textAlign:"left" as const}).fontWeight}
+                      value={((getCurrentElement() as TextElement) || {fontFamily:"Inter",fontWeight:"400",fontSize:"16",fontColor:"#000000",lineHeight:"1.5",letterSpacing:"0",textAlign:"left" as const}).fontWeight}
                       onValueChange={(value) => updateCurrentElement({ fontWeight: value })}
                     >
                       <SelectTrigger className="flex-1">
@@ -1413,7 +1418,7 @@ function FormBuilderContent() {
                 <div>
                   <label className="mb-2 block text-sm font-medium text-gray-900">Size</label>
                   <Select
-                    value={((getCurrentElement() as TextElement) || {fontFamily:"Arial",fontWeight:"400",fontSize:"16",fontColor:"#000000",lineHeight:"1.5",letterSpacing:"0",textAlign:"left" as const}).fontSize}
+                    value={((getCurrentElement() as TextElement) || {fontFamily:"Inter",fontWeight:"400",fontSize:"16",fontColor:"#000000",lineHeight:"1.5",letterSpacing:"0",textAlign:"left" as const}).fontSize}
                     onValueChange={(value) => updateCurrentElement({ fontSize: value })}
                   >
                     <SelectTrigger>
@@ -1442,7 +1447,7 @@ function FormBuilderContent() {
                   <div className="flex gap-2">
                     <button
                       className={`flex h-10 flex-1 items-center justify-center rounded border ${
-                        ((getCurrentElement() as TextElement) || {fontFamily:"Arial",fontWeight:"400",fontSize:"16",fontColor:"#000000",lineHeight:"1.5",letterSpacing:"0",textAlign:"left" as const}).textAlign === "left"
+                        ((getCurrentElement() as TextElement) || {fontFamily:"Inter",fontWeight:"400",fontSize:"16",fontColor:"#000000",lineHeight:"1.5",letterSpacing:"0",textAlign:"left" as const}).textAlign === "left"
                           ? "border-blue-500 bg-blue-50"
                           : "border-gray-300 hover:bg-gray-50"
                       }`}
@@ -1452,7 +1457,7 @@ function FormBuilderContent() {
                     </button>
                     <button
                       className={`flex h-10 flex-1 items-center justify-center rounded border ${
-                        ((getCurrentElement() as TextElement) || {fontFamily:"Arial",fontWeight:"400",fontSize:"16",fontColor:"#000000",lineHeight:"1.5",letterSpacing:"0",textAlign:"left" as const}).textAlign === "center"
+                        ((getCurrentElement() as TextElement) || {fontFamily:"Inter",fontWeight:"400",fontSize:"16",fontColor:"#000000",lineHeight:"1.5",letterSpacing:"0",textAlign:"left" as const}).textAlign === "center"
                           ? "border-blue-500 bg-blue-50"
                           : "border-gray-300 hover:bg-gray-50"
                       }`}
@@ -1462,7 +1467,7 @@ function FormBuilderContent() {
                     </button>
                     <button
                       className={`flex h-10 flex-1 items-center justify-center rounded border ${
-                        ((getCurrentElement() as TextElement) || {fontFamily:"Arial",fontWeight:"400",fontSize:"16",fontColor:"#000000",lineHeight:"1.5",letterSpacing:"0",textAlign:"left" as const}).textAlign === "right"
+                        ((getCurrentElement() as TextElement) || {fontFamily:"Inter",fontWeight:"400",fontSize:"16",fontColor:"#000000",lineHeight:"1.5",letterSpacing:"0",textAlign:"left" as const}).textAlign === "right"
                           ? "border-blue-500 bg-blue-50"
                           : "border-gray-300 hover:bg-gray-50"
                       }`}
@@ -1480,7 +1485,7 @@ function FormBuilderContent() {
                     <div>
                       <label className="mb-1 block text-xs text-gray-600">Line height</label>
                       <Select
-                        value={((getCurrentElement() as TextElement) || {fontFamily:"Arial",fontWeight:"400",fontSize:"16",fontColor:"#000000",lineHeight:"1.5",letterSpacing:"0",textAlign:"left" as const}).lineHeight}
+                        value={((getCurrentElement() as TextElement) || {fontFamily:"Inter",fontWeight:"400",fontSize:"16",fontColor:"#000000",lineHeight:"1.5",letterSpacing:"0",textAlign:"left" as const}).lineHeight}
                         onValueChange={(value) => updateCurrentElement({ lineHeight: value })}
                       >
                         <SelectTrigger>
@@ -1499,7 +1504,7 @@ function FormBuilderContent() {
                     <div>
                       <label className="mb-1 block text-xs text-gray-600">Letter spacing</label>
                       <Select
-                        value={((getCurrentElement() as TextElement) || {fontFamily:"Arial",fontWeight:"400",fontSize:"16",fontColor:"#000000",lineHeight:"1.5",letterSpacing:"0",textAlign:"left" as const}).letterSpacing}
+                        value={((getCurrentElement() as TextElement) || {fontFamily:"Inter",fontWeight:"400",fontSize:"16",fontColor:"#000000",lineHeight:"1.5",letterSpacing:"0",textAlign:"left" as const}).letterSpacing}
                         onValueChange={(value) => updateCurrentElement({ letterSpacing: value })}
                       >
                         <SelectTrigger>
@@ -1657,18 +1662,23 @@ function FormBuilderContent() {
                     <label className="mb-2 block text-sm font-medium text-gray-900">Font</label>
                     <div className="flex gap-2">
                       <Select
-                        value={(getCurrentElement() as ButtonElement)?.fontFamily || "Arial"}
+                        value={(getCurrentElement() as ButtonElement)?.fontFamily || "Inter"}
                         onValueChange={(value) => updateCurrentElement({ fontFamily: value })}
                       >
                         <SelectTrigger className="flex-1">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="Arial">Arial</SelectItem>
+                          <SelectItem value="Inter">Inter</SelectItem>
+                          <SelectItem value="Poppins">Poppins</SelectItem>
+                          <SelectItem value="Manrope">Manrope</SelectItem>
+                          <SelectItem value="Playfair Display">Playfair Display</SelectItem>
+                          <SelectItem value="Merriweather">Merriweather</SelectItem>
+                          <SelectItem value="JetBrains Mono">JetBrains Mono</SelectItem>
+                          <SelectItem value="Bebas Neue">Bebas Neue</SelectItem>
+                          <SelectItem value="Abril Fatface">Abril Fatface</SelectItem>
                           <SelectItem value="Georgia">Georgia</SelectItem>
-                          <SelectItem value="Times New Roman">Times New Roman</SelectItem>
-                          <SelectItem value="Courier New">Courier New</SelectItem>
-                          <SelectItem value="Verdana">Verdana</SelectItem>
+                          <SelectItem value="Arial">Arial</SelectItem>
                         </SelectContent>
                       </Select>
                       <Select
@@ -1985,18 +1995,23 @@ function FormBuilderContent() {
                     <label className="mb-2 block text-sm font-medium text-gray-900">Font</label>
                     <div className="flex gap-2">
                       <Select
-                        value={(getCurrentElement() as FieldElement)?.fontFamily || "Arial"}
+                        value={(getCurrentElement() as FieldElement)?.fontFamily || "Inter"}
                         onValueChange={(value) => updateCurrentElement({ fontFamily: value })}
                       >
                         <SelectTrigger className="flex-1">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="Arial">Arial</SelectItem>
+                          <SelectItem value="Inter">Inter</SelectItem>
+                          <SelectItem value="Poppins">Poppins</SelectItem>
+                          <SelectItem value="Manrope">Manrope</SelectItem>
+                          <SelectItem value="Playfair Display">Playfair Display</SelectItem>
+                          <SelectItem value="Merriweather">Merriweather</SelectItem>
+                          <SelectItem value="JetBrains Mono">JetBrains Mono</SelectItem>
+                          <SelectItem value="Bebas Neue">Bebas Neue</SelectItem>
+                          <SelectItem value="Abril Fatface">Abril Fatface</SelectItem>
                           <SelectItem value="Georgia">Georgia</SelectItem>
-                          <SelectItem value="Times New Roman">Times New Roman</SelectItem>
-                          <SelectItem value="Courier New">Courier New</SelectItem>
-                          <SelectItem value="Verdana">Verdana</SelectItem>
+                          <SelectItem value="Arial">Arial</SelectItem>
                         </SelectContent>
                       </Select>
                       <Select
