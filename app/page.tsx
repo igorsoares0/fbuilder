@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Monitor, Smartphone, AlignLeft, AlignCenter, AlignRight, Upload, Plus, Type, MousePointer, Image as ImageIcon, Undo, Redo, ArrowLeft, Settings, Trash2 } from "lucide-react"
+import { Monitor, Smartphone, AlignLeft, AlignCenter, AlignRight, Upload, Plus, Type, MousePointer, Image as ImageIcon, Undo, Redo, ArrowLeft, Settings, Trash2, ChevronUp, ChevronDown } from "lucide-react"
 import { ColorPickerButton } from "@/components/color-picker-button"
 
 type ElementType = "text" | "button" | "field" | "image" | null
@@ -696,6 +696,28 @@ function FormBuilderContent() {
     }
   }
 
+  const handleMoveElementUp = (index: number) => {
+    if (index === 0) return // Already at top
+
+    const newElements = [...formElements]
+    // Swap with previous element
+    const temp = newElements[index]
+    newElements[index] = newElements[index - 1]
+    newElements[index - 1] = temp
+    setFormElements(newElements)
+  }
+
+  const handleMoveElementDown = (index: number) => {
+    if (index === formElements.length - 1) return // Already at bottom
+
+    const newElements = [...formElements]
+    // Swap with next element
+    const temp = newElements[index]
+    newElements[index] = newElements[index + 1]
+    newElements[index + 1] = temp
+    setFormElements(newElements)
+  }
+
   // Show loading state while form is loading
   if (isLoading) {
     return (
@@ -921,7 +943,10 @@ function FormBuilderContent() {
                   }}
                 >
                   <div className="w-full max-w-md space-y-6">
-                    {inlineElements.map((element, index) => (
+                    {inlineElements.map((element) => {
+                      // Get the real index from formElements
+                      const realIndex = formElements.findIndex(el => el.id === element.id)
+                      return (
                   <div key={element.id} className="group relative">
                     {/* Render based on element type */}
                     {element.elementType === "text" && (
@@ -1151,11 +1176,12 @@ function FormBuilderContent() {
                       </div>
                     )}
 
-                    {/* Action buttons below each element */}
+                    {/* Action buttons */}
+                    {/* Bottom buttons - Add and Delete */}
                     <div className="absolute left-1/2 -bottom-3 -translate-x-1/2 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all z-10">
                       <button
                         className="flex h-6 w-6 items-center justify-center rounded-full border border-gray-300 bg-white hover:bg-gray-100 shadow-sm"
-                        onClick={() => handleOpenAddMenu(index)}
+                        onClick={() => handleOpenAddMenu(realIndex)}
                         title="Add element"
                       >
                         <Plus className="h-3 w-3 text-gray-600" />
@@ -1171,8 +1197,39 @@ function FormBuilderContent() {
                         <Trash2 className="h-3 w-3 text-red-600" />
                       </button>
                     </div>
+
+                    {/* Right side buttons - Move Up/Down */}
+                    <div className="absolute -right-14 top-1/2 -translate-y-1/2 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-all z-10">
+                      <button
+                        className={`flex h-7 w-7 items-center justify-center rounded border border-gray-300 bg-white shadow-sm ${
+                          realIndex === 0 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-gray-100'
+                        }`}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleMoveElementUp(realIndex)
+                        }}
+                        disabled={realIndex === 0}
+                        title="Move up"
+                      >
+                        <ChevronUp className="h-4 w-4 text-gray-600" />
+                      </button>
+                      <button
+                        className={`flex h-7 w-7 items-center justify-center rounded border border-gray-300 bg-white shadow-sm ${
+                          realIndex === formElements.length - 1 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-gray-100'
+                        }`}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleMoveElementDown(realIndex)
+                        }}
+                        disabled={realIndex === formElements.length - 1}
+                        title="Move down"
+                      >
+                        <ChevronDown className="h-4 w-4 text-gray-600" />
+                      </button>
+                    </div>
                   </div>
-                ))}
+                      )
+                    })}
               </div>
             </div>
           </div>
