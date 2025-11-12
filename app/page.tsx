@@ -828,7 +828,7 @@ function FormBuilderContent() {
       {/* Main Content */}
       <div className="flex flex-1 overflow-hidden">
         {/* Canvas Area */}
-        <div className="flex flex-1 items-start justify-center bg-gray-50 overflow-y-auto pt-8 pb-8">
+        <div className="flex flex-1 items-stretch justify-center bg-gray-50 overflow-y-auto">
           {(() => {
             // Find positioned image (any image with position !== "inline")
             const positionedImage = formElements.find(el => el.elementType === "image" && (el as ImageElement).position !== "inline") as ImageElement | undefined
@@ -841,7 +841,7 @@ function FormBuilderContent() {
               <div
                 className={`${
                   position === "background" || position === "none" ? "relative" : "flex"
-                } w-full transition-all duration-300 ${
+                } w-full min-h-full my-8 transition-all duration-300 ${
                   previewMode === "desktop" ? "max-w-6xl" : "max-w-md"
                 } ${
                   position === "top"

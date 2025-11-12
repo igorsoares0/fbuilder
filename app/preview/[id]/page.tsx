@@ -117,7 +117,7 @@ export default function PreviewFormPage() {
       </div>
 
       {/* Form Preview */}
-      <div className="min-h-[calc(100vh-60px)] bg-gray-50">
+      <div className="h-[calc(100vh-60px)] overflow-auto">
         {(() => {
           // Find positioned image (any image with position !== "inline")
           const positionedImage = form.elements.find(el => el.elementType === "image" && el.position !== "inline")
