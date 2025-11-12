@@ -874,7 +874,7 @@ function FormBuilderContent() {
                   </div>
                 ) : position !== "none" && position !== "inline" && positionedImage ? (
                   <div
-                    className={`relative cursor-pointer bg-[#C9B896] flex items-center justify-center ${
+                    className={`relative cursor-pointer bg-[#C9B896] self-stretch ${
                       selectedElement === "image" && selectedElementId === positionedImage.id ? "ring-4 ring-blue-500 ring-inset" : ""
                     }`}
                     style={{
@@ -883,7 +883,7 @@ function FormBuilderContent() {
                           ? `${positionedImage.height}%`
                           : (position === "left" || position === "right") && previewMode === "mobile"
                           ? `${positionedImage.width}%`
-                          : "100%",
+                          : undefined,
                       width:
                         (position === "left" || position === "right") && previewMode === "desktop"
                           ? `${positionedImage.width}%`

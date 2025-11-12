@@ -156,12 +156,12 @@ export default function PreviewFormPage() {
                 </div>
               ) : position !== "none" && position !== "inline" && positionedImage ? (
                 <div
-                  className="relative flex items-center justify-center flex-shrink-0"
+                  className="relative flex-shrink-0 self-stretch"
                   style={{
                     height:
                       position === "top" || position === "bottom"
                         ? `${positionedImage.height}%`
-                        : "100%",
+                        : undefined,
                     width:
                       position === "left" || position === "right"
                         ? `${positionedImage.width}%`
@@ -178,7 +178,7 @@ export default function PreviewFormPage() {
 
               {/* Form Section */}
               <div
-                className="flex items-center justify-center px-8 py-12 flex-1"
+                className="flex items-center justify-center px-8 py-12 flex-1 self-stretch"
                 style={{
                   ...(position === "background" || position === "none" || position === "inline"
                     ? { width: '100%' }
