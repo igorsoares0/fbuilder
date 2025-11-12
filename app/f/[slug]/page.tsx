@@ -167,15 +167,15 @@ export default function PublicFormPage() {
           <div
             className={`${
               position === "background" || position === "none" ? "relative" : "flex"
-            } min-h-full w-full ${
+            } h-full w-full ${
               position === "top"
                 ? "flex-col"
                 : position === "bottom"
                 ? "flex-col-reverse"
                 : position === "right"
-                ? "flex-row-reverse"
+                ? "flex-col md:flex-row-reverse"
                 : position === "left"
-                ? "flex-row"
+                ? "flex-col md:flex-row"
                 : position === "background" || position === "none"
                 ? ""
                 : "flex-row"
@@ -192,39 +192,48 @@ export default function PublicFormPage() {
                 />
               </div>
             ) : position !== "none" && position !== "inline" && positionedImage ? (
-              <div
-                className="relative flex-shrink-0 self-stretch"
-                style={{
-                  height:
-                    position === "top" || position === "bottom"
-                      ? `${positionedImage.height}%`
-                      : undefined,
-                  width:
-                    position === "left" || position === "right"
-                      ? `${positionedImage.width}%`
-                      : "100%",
-                }}
-              >
-                <img
-                  src={positionedImage.url}
-                  alt={positionedImage.alt}
-                  className="h-full w-full object-cover"
-                />
-              </div>
+              <>
+                <style dangerouslySetInnerHTML={{__html: `
+                  .positioned-image-container-${positionedImage.id} {
+                    height: ${position === "top" || position === "bottom" ? `${positionedImage.height}%` : position === "left" || position === "right" ? "40vh" : "auto"};
+                    width: 100%;
+                    flex-shrink: 0;
+                  }
+                  @media (min-width: 768px) {
+                    .positioned-image-container-${positionedImage.id} {
+                      height: ${position === "top" || position === "bottom" ? `${positionedImage.height}%` : "100%"};
+                      width: ${position === "left" || position === "right" ? `${positionedImage.width}%` : "100%"};
+                    }
+                  }
+                `}} />
+                <div
+                  className={`relative positioned-image-container-${positionedImage.id}`}
+                >
+                  <img
+                    src={positionedImage.url}
+                    alt={positionedImage.alt}
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+              </>
             ) : null}
 
             {/* Form Section */}
+            {(position === "left" || position === "right") && positionedImage && (
+              <style dangerouslySetInnerHTML={{__html: `
+                @media (min-width: 768px) {
+                  .form-section-${positionedImage.id} {
+                    width: ${100 - parseInt(positionedImage.width || "50")}% !important;
+                  }
+                }
+              `}} />
+            )}
             <div
-              className="flex items-center justify-center px-8 py-12 flex-1 self-stretch"
+              className={`flex items-center justify-center px-8 py-12 flex-1 self-stretch ${
+                (position === "left" || position === "right") && positionedImage ? `form-section-${positionedImage.id}` : ""
+              }`}
               style={{
-                ...(position === "background" || position === "none" || position === "inline"
-                  ? { width: '100%' }
-                  : {
-                      width:
-                        position === "left" || position === "right"
-                          ? `${100 - parseInt(positionedImage?.width || "50")}%`
-                          : "100%",
-                    }),
+                width: '100%',
                 // Apply background settings
                 ...(form.background.type === "color" ? {
                   backgroundColor: form.background.color,
