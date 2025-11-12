@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Monitor, Smartphone, AlignLeft, AlignCenter, AlignRight, Upload, Plus, Type, MousePointer, Image as ImageIcon, Undo, Redo, ArrowLeft, Settings } from "lucide-react"
+import { Monitor, Smartphone, AlignLeft, AlignCenter, AlignRight, Upload, Plus, Type, MousePointer, Image as ImageIcon, Undo, Redo, ArrowLeft, Settings, Trash2 } from "lucide-react"
 import { ColorPickerButton } from "@/components/color-picker-button"
 
 type ElementType = "text" | "button" | "field" | "image" | null
@@ -674,6 +674,28 @@ function FormBuilderContent() {
     setEditingElementId(null)
   }
 
+  const handleDeleteElement = (elementId: string) => {
+    if (!confirm('Are you sure you want to delete this element?')) {
+      return
+    }
+
+    // Remove element from formElements
+    setFormElements(formElements.filter((el) => el.id !== elementId))
+
+    // Reset selection if deleted element was selected
+    if (selectedElementId === elementId) {
+      const remainingElements = formElements.filter((el) => el.id !== elementId)
+      if (remainingElements.length > 0) {
+        const firstElement = remainingElements[0]
+        setSelectedElement(firstElement.elementType)
+        setSelectedElementId(firstElement.id)
+      } else {
+        setSelectedElement(null)
+        setSelectedElementId("")
+      }
+    }
+  }
+
   // Show loading state while form is loading
   if (isLoading) {
     return (
@@ -1129,14 +1151,26 @@ function FormBuilderContent() {
                       </div>
                     )}
 
-                    {/* Add button below each element */}
-                    <button
-                      className="absolute left-1/2 -bottom-3 -translate-x-1/2 flex h-6 w-6 items-center justify-center rounded-full border border-gray-300 bg-white hover:bg-gray-100 transition-all opacity-0 group-hover:opacity-100 shadow-sm z-10"
-                      onClick={() => handleOpenAddMenu(index)}
-                      title="Add element"
-                    >
-                      <Plus className="h-3 w-3 text-gray-600" />
-                    </button>
+                    {/* Action buttons below each element */}
+                    <div className="absolute left-1/2 -bottom-3 -translate-x-1/2 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all z-10">
+                      <button
+                        className="flex h-6 w-6 items-center justify-center rounded-full border border-gray-300 bg-white hover:bg-gray-100 shadow-sm"
+                        onClick={() => handleOpenAddMenu(index)}
+                        title="Add element"
+                      >
+                        <Plus className="h-3 w-3 text-gray-600" />
+                      </button>
+                      <button
+                        className="flex h-6 w-6 items-center justify-center rounded-full border border-red-300 bg-white hover:bg-red-50 shadow-sm"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleDeleteElement(element.id)
+                        }}
+                        title="Delete element"
+                      >
+                        <Trash2 className="h-3 w-3 text-red-600" />
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
