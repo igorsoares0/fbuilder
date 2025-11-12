@@ -117,7 +117,7 @@ export default function PreviewFormPage() {
       </div>
 
       {/* Form Preview */}
-      <div className="h-[calc(100vh-60px)] overflow-hidden bg-gray-50">
+      <div className="min-h-[calc(100vh-60px)] bg-gray-50">
         {(() => {
           // Find positioned image (any image with position !== "inline")
           const positionedImage = form.elements.find(el => el.elementType === "image" && el.position !== "inline")
@@ -130,7 +130,7 @@ export default function PreviewFormPage() {
             <div
               className={`${
                 position === "background" || position === "none" ? "relative" : "flex"
-              } h-full w-full ${
+              } min-h-full w-full ${
                 position === "top"
                   ? "flex-col"
                   : position === "bottom"
@@ -178,7 +178,7 @@ export default function PreviewFormPage() {
 
               {/* Form Section */}
               <div
-                className="flex items-center justify-center px-8 flex-1 overflow-y-auto"
+                className="flex items-center justify-center px-8 py-12 flex-1"
                 style={{
                   ...(position === "background" || position === "none" || position === "inline"
                     ? { width: '100%' }

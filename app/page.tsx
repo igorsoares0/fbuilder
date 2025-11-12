@@ -784,7 +784,7 @@ function FormBuilderContent() {
       {/* Main Content */}
       <div className="flex flex-1 overflow-hidden">
         {/* Canvas Area */}
-        <div className="flex flex-1 items-center justify-center bg-gray-50">
+        <div className="flex flex-1 items-start justify-center bg-gray-50 overflow-y-auto pt-8 pb-8">
           {(() => {
             // Find positioned image (any image with position !== "inline")
             const positionedImage = formElements.find(el => el.elementType === "image" && (el as ImageElement).position !== "inline") as ImageElement | undefined
@@ -797,7 +797,7 @@ function FormBuilderContent() {
               <div
                 className={`${
                   position === "background" || position === "none" ? "relative" : "flex"
-                } h-full w-full transition-all duration-300 ${
+                } w-full transition-all duration-300 ${
                   previewMode === "desktop" ? "max-w-6xl" : "max-w-md"
                 } ${
                   position === "top"
@@ -861,12 +861,12 @@ function FormBuilderContent() {
                     previewMode === "mobile" ? "px-8 py-12" : "px-16 py-20"
                   } ${
                     position === "background"
-                      ? "relative z-10 h-full w-full"
+                      ? "relative z-10 min-h-full w-full"
                       : position === "none"
-                      ? "relative h-full w-full"
+                      ? "relative min-h-full w-full"
                       : position !== "inline" && positionedImage
                       ? "flex-1"
-                      : "relative h-full w-full"
+                      : "relative min-h-full w-full"
                   }`}
                   style={{
                     ...(position === "background" || position === "none" || position === "inline"
