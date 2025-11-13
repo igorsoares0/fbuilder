@@ -743,7 +743,13 @@ function FormBuilderContent() {
             Dashboard
           </button>
           <div className="h-6 w-px bg-gray-300" />
-          <div className="text-sm font-bold tracking-wide">FORM BUILDER</div>
+          <input
+            type="text"
+            value={formTitle}
+            onChange={(e) => setFormTitle(e.target.value)}
+            className="text-sm font-bold tracking-wide bg-transparent border-none outline-none focus:ring-0 hover:bg-gray-50 px-2 py-1 rounded transition-colors"
+            placeholder="Form Title"
+          />
         </div>
 
         <div className="flex items-center gap-8">
