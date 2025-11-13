@@ -64,7 +64,7 @@ interface ButtonElement {
 interface FieldElement {
   id: string
   elementType: "field"
-  type: "text" | "email" | "checkbox"
+  type: "text" | "email" | "checkbox" | "multiple-choice"
   placeholder: string
   label: string
   required: boolean
@@ -80,6 +80,9 @@ interface FieldElement {
   lineHeight: string
   letterSpacing: string
   textAlign: "left" | "center" | "right"
+  // Multiple choice specific
+  multipleChoiceType?: "radio" | "checkbox"
+  options?: string[]
 }
 
 interface ImageElement {
@@ -1020,7 +1023,57 @@ function FormBuilderContent() {
 
                     {element.elementType === "field" && (
                       <div className="w-full">
-                        {element.type === "checkbox" ? (
+                        {element.type === "multiple-choice" ? (
+                          <div
+                            className={`cursor-pointer ${
+                              selectedElement === "field" && selectedElementId === element.id
+                                ? "ring-4 ring-blue-500 ring-offset-2 rounded p-2"
+                                : ""
+                            }`}
+                            onClick={() => handleSelectElement("field", element.id)}
+                          >
+                            {element.label && (
+                              <label
+                                className="mb-3 block text-sm font-medium"
+                                style={{
+                                  fontFamily: element.fontFamily,
+                                  fontWeight: element.fontWeight,
+                                  fontSize: `${element.fontSize}px`,
+                                  color: element.fontColor,
+                                }}
+                              >
+                                {element.label}
+                                {element.required && <span className="text-red-500 ml-1">*</span>}
+                              </label>
+                            )}
+                            <div className="space-y-2">
+                              {(element.options || []).map((option, idx) => (
+                                <div key={idx} className="flex items-center gap-3">
+                                  <input
+                                    type={element.multipleChoiceType || "radio"}
+                                    name={`${element.id}-choice`}
+                                    disabled
+                                    className="cursor-pointer"
+                                    style={{
+                                      accentColor: element.fontColor,
+                                    }}
+                                  />
+                                  <label
+                                    className="text-sm cursor-pointer"
+                                    style={{
+                                      fontFamily: element.fontFamily,
+                                      fontWeight: element.fontWeight,
+                                      fontSize: `${element.fontSize}px`,
+                                      color: element.fontColor,
+                                    }}
+                                  >
+                                    {option}
+                                  </label>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ) : element.type === "checkbox" ? (
                           <div
                             className={`flex items-center gap-3 cursor-pointer ${
                               selectedElement === "field" && selectedElementId === element.id
@@ -1857,7 +1910,17 @@ function FormBuilderContent() {
                     <label className="mb-2 block text-sm font-medium text-gray-900">Field type</label>
                     <Select
                       value={(getCurrentElement() as FieldElement)?.type || "text"}
-                      onValueChange={(value: "text" | "email" | "checkbox") => updateCurrentElement({ type: value })}
+                      onValueChange={(value: "text" | "email" | "checkbox" | "multiple-choice") => {
+                        if (value === "multiple-choice") {
+                          updateCurrentElement({
+                            type: value,
+                            multipleChoiceType: "radio",
+                            options: ["Option 1", "Option 2", "Option 3"]
+                          })
+                        } else {
+                          updateCurrentElement({ type: value })
+                        }
+                      }}
                     >
                       <SelectTrigger>
                         <SelectValue />
@@ -1866,6 +1929,7 @@ function FormBuilderContent() {
                         <SelectItem value="text">Text</SelectItem>
                         <SelectItem value="email">Email</SelectItem>
                         <SelectItem value="checkbox">Checkbox</SelectItem>
+                        <SelectItem value="multiple-choice">Multiple Choice</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -1903,6 +1967,71 @@ function FormBuilderContent() {
                       Required field
                     </label>
                   </div>
+
+                  {/* Multiple Choice Options */}
+                  {(getCurrentElement() as FieldElement)?.type === "multiple-choice" && (
+                    <>
+                      {/* Choice Type */}
+                      <div>
+                        <label className="mb-2 block text-sm font-medium text-gray-900">Choice type</label>
+                        <Select
+                          value={(getCurrentElement() as FieldElement)?.multipleChoiceType || "radio"}
+                          onValueChange={(value: "radio" | "checkbox") => updateCurrentElement({ multipleChoiceType: value })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="radio">Single Choice (Radio)</SelectItem>
+                            <SelectItem value="checkbox">Multiple Choice (Checkbox)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {/* Options */}
+                      <div>
+                        <label className="mb-2 block text-sm font-medium text-gray-900">Options</label>
+                        <div className="space-y-2">
+                          {((getCurrentElement() as FieldElement)?.options || []).map((option, index) => (
+                            <div key={index} className="flex gap-2">
+                              <Input
+                                value={option}
+                                onChange={(e) => {
+                                  const currentElement = getCurrentElement() as FieldElement
+                                  const newOptions = [...(currentElement?.options || [])]
+                                  newOptions[index] = e.target.value
+                                  updateCurrentElement({ options: newOptions })
+                                }}
+                                placeholder={`Option ${index + 1}`}
+                                className="text-sm flex-1"
+                              />
+                              <button
+                                onClick={() => {
+                                  const currentElement = getCurrentElement() as FieldElement
+                                  const newOptions = [...(currentElement?.options || [])]
+                                  newOptions.splice(index, 1)
+                                  updateCurrentElement({ options: newOptions })
+                                }}
+                                className="px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded transition-colors"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            </div>
+                          ))}
+                          <button
+                            onClick={() => {
+                              const currentElement = getCurrentElement() as FieldElement
+                              const newOptions = [...(currentElement?.options || []), `Option ${((currentElement?.options || []).length + 1)}`]
+                              updateCurrentElement({ options: newOptions })
+                            }}
+                            className="w-full px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 rounded transition-colors border border-blue-200"
+                          >
+                            + Add Option
+                          </button>
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
 

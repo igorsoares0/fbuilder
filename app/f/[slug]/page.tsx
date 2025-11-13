@@ -275,7 +275,71 @@ export default function PublicFormPage() {
 
                       {element.elementType === 'field' && (
                         <div>
-                          {element.type === 'checkbox' ? (
+                          {element.type === 'multiple-choice' ? (
+                            <div>
+                              {element.label && (
+                                <label
+                                  className="mb-3 block text-sm font-medium"
+                                  style={{
+                                    fontFamily: element.fontFamily,
+                                    fontWeight: element.fontWeight,
+                                    fontSize: `${element.fontSize}px`,
+                                    color: element.fontColor,
+                                  }}
+                                >
+                                  {element.label}
+                                  {element.required && <span className="text-red-500 ml-1">*</span>}
+                                </label>
+                              )}
+                              <div className="space-y-2">
+                                {(element.options || []).map((option: string, idx: number) => (
+                                  <div key={idx} className="flex items-center gap-3">
+                                    <input
+                                      type={element.multipleChoiceType || 'radio'}
+                                      name={`${element.id}-choice`}
+                                      value={option}
+                                      checked={
+                                        element.multipleChoiceType === 'checkbox'
+                                          ? Array.isArray(formData[element.id]) && formData[element.id].includes(option)
+                                          : formData[element.id] === option
+                                      }
+                                      onChange={(e) => {
+                                        if (element.multipleChoiceType === 'checkbox') {
+                                          const current = Array.isArray(formData[element.id]) ? formData[element.id] : []
+                                          if (e.target.checked) {
+                                            handleFieldChange(element.id, [...current, option])
+                                          } else {
+                                            handleFieldChange(element.id, current.filter((v: string) => v !== option))
+                                          }
+                                        } else {
+                                          handleFieldChange(element.id, option)
+                                        }
+                                      }}
+                                      required={element.required && !formData[element.id]}
+                                      className="cursor-pointer"
+                                      style={{
+                                        accentColor: element.fontColor,
+                                      }}
+                                    />
+                                    <label
+                                      className="text-sm cursor-pointer"
+                                      style={{
+                                        fontFamily: element.fontFamily,
+                                        fontWeight: element.fontWeight,
+                                        fontSize: `${element.fontSize}px`,
+                                        color: element.fontColor,
+                                      }}
+                                    >
+                                      {option}
+                                    </label>
+                                  </div>
+                                ))}
+                              </div>
+                              {errors[element.id] && (
+                                <p className="mt-1 text-sm text-red-500">{errors[element.id]}</p>
+                              )}
+                            </div>
+                          ) : element.type === 'checkbox' ? (
                             <div className="flex items-center gap-3">
                               <Checkbox
                                 id={element.id}
