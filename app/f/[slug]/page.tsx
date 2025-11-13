@@ -427,6 +427,54 @@ export default function PublicFormPage() {
                                 </label>
                               )}
                             </div>
+                          ) : element.type === 'long-text' ? (
+                            <>
+                              {element.label && (
+                                <label
+                                  className="mb-2 block text-sm font-medium"
+                                  style={{
+                                    fontFamily: element.fontFamily,
+                                    color: element.fontColor,
+                                  }}
+                                >
+                                  {element.label}
+                                  {element.required && <span className="text-red-500 ml-1">*</span>}
+                                </label>
+                              )}
+                              <style dangerouslySetInnerHTML={{__html: `
+                                .field-input-${element.id} {
+                                  color: ${element.fontColor} !important;
+                                }
+                                .field-input-${element.id}::placeholder {
+                                  color: ${element.fontColor} !important;
+                                  opacity: 0.5;
+                                }
+                              `}} />
+                              <textarea
+                                placeholder={element.placeholder}
+                                value={formData[element.id] || ''}
+                                onChange={(e) => handleFieldChange(element.id, e.target.value)}
+                                required={element.required}
+                                rows={element.rows || 4}
+                                className={`field-input-${element.id} w-full px-6 py-3 resize-none`}
+                                style={{
+                                  backgroundColor: element.fillColor,
+                                  borderColor: errors[element.id] ? '#ef4444' : element.borderColor,
+                                  borderWidth: `${element.borderWidth}px`,
+                                  borderStyle: 'solid',
+                                  borderRadius: `${element.borderRadius}px`,
+                                  fontFamily: element.fontFamily,
+                                  fontWeight: element.fontWeight,
+                                  fontSize: `${element.fontSize}px`,
+                                  lineHeight: element.lineHeight,
+                                  letterSpacing: `${element.letterSpacing}px`,
+                                  textAlign: element.textAlign,
+                                }}
+                              />
+                              {errors[element.id] && (
+                                <p className="mt-1 text-sm text-red-500">{errors[element.id]}</p>
+                              )}
+                            </>
                           ) : (
                             <>
                               {element.label && (

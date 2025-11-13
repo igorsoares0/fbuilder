@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, Suspense } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -64,7 +65,7 @@ interface ButtonElement {
 interface FieldElement {
   id: string
   elementType: "field"
-  type: "text" | "email" | "checkbox" | "multiple-choice" | "rating"
+  type: "text" | "email" | "checkbox" | "multiple-choice" | "rating" | "long-text"
   placeholder: string
   label: string
   required: boolean
@@ -86,6 +87,8 @@ interface FieldElement {
   // Rating specific
   maxRating?: number
   starColor?: string
+  // Long text specific
+  rows?: number
 }
 
 interface ImageElement {
@@ -1143,6 +1146,53 @@ function FormBuilderContent() {
                               </label>
                             )}
                           </div>
+                        ) : element.type === "long-text" ? (
+                          <>
+                            {element.label && (
+                              <label
+                                className="mb-2 block text-sm font-medium"
+                                style={{
+                                  fontFamily: element.fontFamily,
+                                  color: element.fontColor,
+                                }}
+                              >
+                                {element.label}
+                              </label>
+                            )}
+                            <style dangerouslySetInnerHTML={{__html: `
+                              .field-input-${element.id} {
+                                color: ${element.fontColor} !important;
+                              }
+                              .field-input-${element.id}::placeholder {
+                                color: ${element.fontColor} !important;
+                                opacity: 0.5;
+                              }
+                            `}} />
+                            <Textarea
+                              placeholder={element.placeholder}
+                              required={element.required}
+                              rows={element.rows || 4}
+                              className={`field-input-${element.id} w-full cursor-pointer px-6 py-3 resize-none transition-all ${
+                                selectedElement === "field" && selectedElementId === element.id
+                                  ? "ring-4 ring-blue-500 ring-offset-2"
+                                  : ""
+                              }`}
+                              style={{
+                                backgroundColor: element.fillColor,
+                                borderColor: element.borderColor,
+                                borderWidth: `${element.borderWidth}px`,
+                                borderStyle: "solid",
+                                borderRadius: `${element.borderRadius}px`,
+                                fontFamily: element.fontFamily,
+                                fontWeight: element.fontWeight,
+                                fontSize: `${element.fontSize}px`,
+                                lineHeight: element.lineHeight,
+                                letterSpacing: `${element.letterSpacing}px`,
+                                textAlign: element.textAlign,
+                              }}
+                              onClick={() => handleSelectElement("field", element.id)}
+                            />
+                          </>
                         ) : (
                           <>
                             {element.label && (
@@ -1949,7 +1999,7 @@ function FormBuilderContent() {
                     <label className="mb-2 block text-sm font-medium text-gray-900">Field type</label>
                     <Select
                       value={(getCurrentElement() as FieldElement)?.type || "text"}
-                      onValueChange={(value: "text" | "email" | "checkbox" | "multiple-choice" | "rating") => {
+                      onValueChange={(value: "text" | "email" | "checkbox" | "multiple-choice" | "rating" | "long-text") => {
                         if (value === "multiple-choice") {
                           updateCurrentElement({
                             type: value,
@@ -1962,6 +2012,12 @@ function FormBuilderContent() {
                             maxRating: 5,
                             starColor: "#FFD700"
                           })
+                        } else if (value === "long-text") {
+                          updateCurrentElement({
+                            type: value,
+                            rows: 4,
+                            height: "120"
+                          })
                         } else {
                           updateCurrentElement({ type: value })
                         }
@@ -1972,6 +2028,7 @@ function FormBuilderContent() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="text">Text</SelectItem>
+                        <SelectItem value="long-text">Long Text</SelectItem>
                         <SelectItem value="email">Email</SelectItem>
                         <SelectItem value="checkbox">Checkbox</SelectItem>
                         <SelectItem value="multiple-choice">Multiple Choice</SelectItem>
@@ -2107,6 +2164,35 @@ function FormBuilderContent() {
                         onChange={(color) => updateCurrentElement({ starColor: color })}
                       />
                     </>
+                  )}
+
+                  {/* Long Text Options */}
+                  {(getCurrentElement() as FieldElement)?.type === "long-text" && (
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-gray-900">Number of rows</label>
+                      <Select
+                        value={String((getCurrentElement() as FieldElement)?.rows || 4)}
+                        onValueChange={(value) => {
+                          const rows = parseInt(value)
+                          updateCurrentElement({
+                            rows: rows,
+                            height: String(rows * 30)
+                          })
+                        }}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="3">3 rows</SelectItem>
+                          <SelectItem value="4">4 rows</SelectItem>
+                          <SelectItem value="5">5 rows</SelectItem>
+                          <SelectItem value="6">6 rows</SelectItem>
+                          <SelectItem value="8">8 rows</SelectItem>
+                          <SelectItem value="10">10 rows</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   )}
                 </div>
               )}
