@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Monitor, Smartphone, AlignLeft, AlignCenter, AlignRight, Upload, Plus, Type, MousePointer, Image as ImageIcon, Undo, Redo, ArrowLeft, Settings, Trash2, ChevronUp, ChevronDown } from "lucide-react"
+import { Monitor, Smartphone, AlignLeft, AlignCenter, AlignRight, Upload, Plus, Type, MousePointer, Image as ImageIcon, Undo, Redo, ArrowLeft, Settings, Trash2, ChevronUp, ChevronDown, Star } from "lucide-react"
 import { ColorPickerButton } from "@/components/color-picker-button"
 
 type ElementType = "text" | "button" | "field" | "image" | null
@@ -64,7 +64,7 @@ interface ButtonElement {
 interface FieldElement {
   id: string
   elementType: "field"
-  type: "text" | "email" | "checkbox" | "multiple-choice"
+  type: "text" | "email" | "checkbox" | "multiple-choice" | "rating"
   placeholder: string
   label: string
   required: boolean
@@ -83,6 +83,9 @@ interface FieldElement {
   // Multiple choice specific
   multipleChoiceType?: "radio" | "checkbox"
   options?: string[]
+  // Rating specific
+  maxRating?: number
+  starColor?: string
 }
 
 interface ImageElement {
@@ -1023,7 +1026,43 @@ function FormBuilderContent() {
 
                     {element.elementType === "field" && (
                       <div className="w-full">
-                        {element.type === "multiple-choice" ? (
+                        {element.type === "rating" ? (
+                          <div
+                            className={`cursor-pointer ${
+                              selectedElement === "field" && selectedElementId === element.id
+                                ? "ring-4 ring-blue-500 ring-offset-2 rounded p-2"
+                                : ""
+                            }`}
+                            onClick={() => handleSelectElement("field", element.id)}
+                          >
+                            {element.label && (
+                              <label
+                                className="mb-3 block text-sm font-medium"
+                                style={{
+                                  fontFamily: element.fontFamily,
+                                  fontWeight: element.fontWeight,
+                                  fontSize: `${element.fontSize}px`,
+                                  color: element.fontColor,
+                                }}
+                              >
+                                {element.label}
+                                {element.required && <span className="text-red-500 ml-1">*</span>}
+                              </label>
+                            )}
+                            <div className="flex gap-2">
+                              {Array.from({ length: element.maxRating || 5 }).map((_, idx) => (
+                                <Star
+                                  key={idx}
+                                  className="cursor-pointer transition-all"
+                                  size={32}
+                                  fill="transparent"
+                                  stroke={element.starColor || "#FFD700"}
+                                  strokeWidth={2}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                        ) : element.type === "multiple-choice" ? (
                           <div
                             className={`cursor-pointer ${
                               selectedElement === "field" && selectedElementId === element.id
@@ -1910,12 +1949,18 @@ function FormBuilderContent() {
                     <label className="mb-2 block text-sm font-medium text-gray-900">Field type</label>
                     <Select
                       value={(getCurrentElement() as FieldElement)?.type || "text"}
-                      onValueChange={(value: "text" | "email" | "checkbox" | "multiple-choice") => {
+                      onValueChange={(value: "text" | "email" | "checkbox" | "multiple-choice" | "rating") => {
                         if (value === "multiple-choice") {
                           updateCurrentElement({
                             type: value,
                             multipleChoiceType: "radio",
                             options: ["Option 1", "Option 2", "Option 3"]
+                          })
+                        } else if (value === "rating") {
+                          updateCurrentElement({
+                            type: value,
+                            maxRating: 5,
+                            starColor: "#FFD700"
                           })
                         } else {
                           updateCurrentElement({ type: value })
@@ -1930,6 +1975,7 @@ function FormBuilderContent() {
                         <SelectItem value="email">Email</SelectItem>
                         <SelectItem value="checkbox">Checkbox</SelectItem>
                         <SelectItem value="multiple-choice">Multiple Choice</SelectItem>
+                        <SelectItem value="rating">Rating (Stars)</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -2030,6 +2076,36 @@ function FormBuilderContent() {
                           </button>
                         </div>
                       </div>
+                    </>
+                  )}
+
+                  {/* Rating Options */}
+                  {(getCurrentElement() as FieldElement)?.type === "rating" && (
+                    <>
+                      {/* Max Rating */}
+                      <div>
+                        <label className="mb-2 block text-sm font-medium text-gray-900">Number of stars</label>
+                        <Select
+                          value={String((getCurrentElement() as FieldElement)?.maxRating || 5)}
+                          onValueChange={(value) => updateCurrentElement({ maxRating: parseInt(value) })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="3">3 Stars</SelectItem>
+                            <SelectItem value="5">5 Stars</SelectItem>
+                            <SelectItem value="10">10 Stars</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {/* Star Color */}
+                      <ColorPickerButton
+                        label="Star color"
+                        color={(getCurrentElement() as FieldElement)?.starColor || "#FFD700"}
+                        onChange={(color) => updateCurrentElement({ starColor: color })}
+                      />
                     </>
                   )}
                 </div>

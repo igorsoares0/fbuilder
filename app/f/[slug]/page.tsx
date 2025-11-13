@@ -275,7 +275,68 @@ export default function PublicFormPage() {
 
                       {element.elementType === 'field' && (
                         <div>
-                          {element.type === 'multiple-choice' ? (
+                          {element.type === 'rating' ? (
+                            <div>
+                              {element.label && (
+                                <label
+                                  className="mb-3 block text-sm font-medium"
+                                  style={{
+                                    fontFamily: element.fontFamily,
+                                    fontWeight: element.fontWeight,
+                                    fontSize: `${element.fontSize}px`,
+                                    color: element.fontColor,
+                                  }}
+                                >
+                                  {element.label}
+                                  {element.required && <span className="text-red-500 ml-1">*</span>}
+                                </label>
+                              )}
+                              <div className="flex gap-2">
+                                {Array.from({ length: element.maxRating || 5 }).map((_, idx) => {
+                                  const rating = idx + 1
+                                  const currentRating = formData[element.id] || 0
+                                  return (
+                                    <svg
+                                      key={idx}
+                                      className="cursor-pointer transition-all hover:scale-110"
+                                      width="32"
+                                      height="32"
+                                      viewBox="0 0 24 24"
+                                      fill={rating <= currentRating ? element.starColor || '#FFD700' : 'transparent'}
+                                      stroke={element.starColor || '#FFD700'}
+                                      strokeWidth="2"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      onClick={() => handleFieldChange(element.id, rating)}
+                                      onMouseEnter={(e) => {
+                                        const stars = e.currentTarget.parentElement?.querySelectorAll('svg')
+                                        stars?.forEach((star, i) => {
+                                          if (i < rating) {
+                                            star.setAttribute('fill', element.starColor || '#FFD700')
+                                          }
+                                        })
+                                      }}
+                                      onMouseLeave={(e) => {
+                                        const stars = e.currentTarget.parentElement?.querySelectorAll('svg')
+                                        stars?.forEach((star, i) => {
+                                          if (i + 1 <= currentRating) {
+                                            star.setAttribute('fill', element.starColor || '#FFD700')
+                                          } else {
+                                            star.setAttribute('fill', 'transparent')
+                                          }
+                                        })
+                                      }}
+                                    >
+                                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                                    </svg>
+                                  )
+                                })}
+                              </div>
+                              {errors[element.id] && (
+                                <p className="mt-1 text-sm text-red-500">{errors[element.id]}</p>
+                              )}
+                            </div>
+                          ) : element.type === 'multiple-choice' ? (
                             <div>
                               {element.label && (
                                 <label
