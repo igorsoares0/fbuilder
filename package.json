@@ -60,13 +60,19 @@
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^0.9.9",
-    "zod": "3.25.76"
+    "zod": "3.25.76",
+    "next-auth": "5.0.0-beta.25",
+    "@auth/prisma-adapter": "^2.7.4",
+    "bcryptjs": "^2.4.3",
+    "mailgun.js": "^10.2.3",
+    "form-data": "^4.0.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.9",
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/bcryptjs": "^2.4.6",
     "postcss": "^8.5",
     "prisma": "^6.18.0",
     "tailwindcss": "^4.1.9",

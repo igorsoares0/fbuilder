@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { publishFormSchema } from '@/lib/validations/form'
 import { Prisma } from '@prisma/client'
+import { auth } from '@/lib/auth'
 
 // POST /api/forms/[id]/publish - Publish or unpublish a form
 export async function POST(
@@ -9,11 +10,20 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await auth()
+
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
     const { id } = await params
     const body = await request.json()
     const validatedData = publishFormSchema.parse(body)
 
-    // Check if form exists
+    // Check if form exists and belongs to user
     const existingForm = await prisma.form.findUnique({
       where: { id },
     })
@@ -22,6 +32,14 @@ export async function POST(
       return NextResponse.json(
         { error: 'Form not found' },
         { status: 404 }
+      )
+    }
+
+    // Check ownership
+    if (existingForm.userId !== session.user.id) {
+      return NextResponse.json(
+        { error: 'Forbidden' },
+        { status: 403 }
       )
     }
 

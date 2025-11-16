@@ -12,6 +12,7 @@ import {
   Abril_Fatface
 } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
+import { AuthSessionProvider } from '@/components/providers/session-provider'
 import './globals.css'
 
 const _geist = Geist({
@@ -76,8 +77,8 @@ const abril = Abril_Fatface({
 });
 
 export const metadata: Metadata = {
-  title: 'v0 App',
-  description: 'Created with v0',
+  title: 'Form Builder',
+  description: 'Create beautiful forms with ease',
   generator: 'v0.app',
 }
 
@@ -104,7 +105,9 @@ export default function RootLayout({
         `}
         suppressHydrationWarning
       >
-        {children}
+        <AuthSessionProvider>
+          {children}
+        </AuthSessionProvider>
         <Analytics />
       </body>
     </html>

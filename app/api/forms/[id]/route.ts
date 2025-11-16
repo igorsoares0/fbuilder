@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { updateFormSchema } from '@/lib/validations/form'
+import { auth } from '@/lib/auth'
 
 // GET /api/forms/[id] - Get a single form
 export async function GET(
@@ -8,6 +9,15 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await auth()
+
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
     const { id } = await params
     const form = await prisma.form.findUnique({
       where: { id },
@@ -22,6 +32,14 @@ export async function GET(
       return NextResponse.json(
         { error: 'Form not found' },
         { status: 404 }
+      )
+    }
+
+    // Check ownership
+    if (form.userId !== session.user.id) {
+      return NextResponse.json(
+        { error: 'Forbidden' },
+        { status: 403 }
       )
     }
 
@@ -41,11 +59,20 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await auth()
+
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
     const { id } = await params
     const body = await request.json()
     const validatedData = updateFormSchema.parse(body)
 
-    // Check if form exists
+    // Check if form exists and belongs to user
     const existingForm = await prisma.form.findUnique({
       where: { id },
     })
@@ -54,6 +81,14 @@ export async function PATCH(
       return NextResponse.json(
         { error: 'Form not found' },
         { status: 404 }
+      )
+    }
+
+    // Check ownership
+    if (existingForm.userId !== session.user.id) {
+      return NextResponse.json(
+        { error: 'Forbidden' },
+        { status: 403 }
       )
     }
 
@@ -86,9 +121,18 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await auth()
+
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
     const { id } = await params
 
-    // Check if form exists
+    // Check if form exists and belongs to user
     const existingForm = await prisma.form.findUnique({
       where: { id },
     })
@@ -97,6 +141,14 @@ export async function DELETE(
       return NextResponse.json(
         { error: 'Form not found' },
         { status: 404 }
+      )
+    }
+
+    // Check ownership
+    if (existingForm.userId !== session.user.id) {
+      return NextResponse.json(
+        { error: 'Forbidden' },
+        { status: 403 }
       )
     }
 

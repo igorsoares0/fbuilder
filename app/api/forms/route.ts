@@ -2,11 +2,22 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { createFormSchema } from '@/lib/validations/form'
 import { getDefaultTemplate, getBlankTemplate, getDefaultBackground } from '@/lib/helpers/form-templates'
+import { auth } from '@/lib/auth'
 
-// GET /api/forms - List all forms
+// GET /api/forms - List all forms for current user
 export async function GET() {
   try {
+    const session = await auth()
+
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
     const forms = await prisma.form.findMany({
+      where: { userId: session.user.id },
       orderBy: { updatedAt: 'desc' },
       select: {
         id: true,
@@ -38,6 +49,15 @@ export async function GET() {
 // POST /api/forms - Create a new form
 export async function POST(request: Request) {
   try {
+    const session = await auth()
+
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
     const body = await request.json()
     const validatedData = createFormSchema.parse(body)
 
@@ -55,6 +75,7 @@ export async function POST(request: Request) {
         elements,
         background,
         status: 'DRAFT',
+        userId: session.user.id,
       },
     })
 

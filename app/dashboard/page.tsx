@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { useSession, signOut } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
@@ -21,13 +22,17 @@ import {
   FileX,
   Circle,
   BarChart,
+  LogOut,
+  User,
 } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 interface FormData {
   id: string
@@ -47,6 +52,7 @@ interface FormData {
 
 export default function DashboardPage() {
   const router = useRouter()
+  const { data: session } = useSession()
   const [searchQuery, setSearchQuery] = useState("")
   const [showTemplateDialog, setShowTemplateDialog] = useState(false)
   const [forms, setForms] = useState<FormData[]>([])
@@ -60,6 +66,25 @@ export default function DashboardPage() {
   useEffect(() => {
     loadForms()
   }, [])
+
+  const handleSignOut = async () => {
+    await signOut({ callbackUrl: "/login" })
+  }
+
+  const getUserInitials = () => {
+    if (session?.user?.name) {
+      return session.user.name
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2)
+    }
+    if (session?.user?.email) {
+      return session.user.email[0].toUpperCase()
+    }
+    return "U"
+  }
 
   const loadForms = async () => {
     try {
@@ -99,7 +124,7 @@ export default function DashboardPage() {
 
       const newForm = await response.json()
       setShowTemplateDialog(false)
-      router.push(`/?id=${newForm.id}`)
+      router.push(`/editor?id=${newForm.id}`)
     } catch (error) {
       console.error('Error creating form:', error)
       alert('Failed to create form. Please try again.')
@@ -107,7 +132,7 @@ export default function DashboardPage() {
   }
 
   const handleEditForm = (formId: string) => {
-    router.push(`/?id=${formId}`)
+    router.push(`/editor?id=${formId}`)
   }
 
   const handleDuplicateForm = async (formId: string) => {
@@ -213,13 +238,44 @@ export default function DashboardPage() {
               </nav>
             </div>
 
-            <Button
-              onClick={() => setShowTemplateDialog(true)}
-              className="bg-black px-6 py-2 text-sm font-medium text-white hover:bg-gray-800"
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              Create Form
-            </Button>
+            <div className="flex items-center gap-4">
+              <Button
+                onClick={() => setShowTemplateDialog(true)}
+                className="bg-black px-6 py-2 text-sm font-medium text-white hover:bg-gray-800"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Create Form
+              </Button>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex items-center gap-2 rounded-full focus:outline-none focus:ring-2 focus:ring-gray-200">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={session?.user?.image || undefined} />
+                      <AvatarFallback className="bg-gray-100 text-sm font-medium">
+                        {getUserInitials()}
+                      </AvatarFallback>
+                    </Avatar>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <div className="px-2 py-1.5">
+                    <p className="text-sm font-medium">{session?.user?.name || "User"}</p>
+                    <p className="text-xs text-gray-500">{session?.user?.email}</p>
+                  </div>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => router.push("/settings")}>
+                    <User className="mr-2 h-4 w-4" />
+                    Account Settings
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleSignOut} className="text-red-600 focus:text-red-600">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
         </div>
       </header>
@@ -229,7 +285,9 @@ export default function DashboardPage() {
         <div className="mx-auto max-w-7xl px-6 py-8">
           {/* Welcome Section */}
           <div className="mb-8">
-            <h2 className="text-3xl font-bold text-gray-900">Welcome back</h2>
+            <h2 className="text-3xl font-bold text-gray-900">
+              Welcome back{session?.user?.name ? `, ${session.user.name.split(" ")[0]}` : ""}
+            </h2>
             <p className="mt-2 text-gray-600">Here's what's happening with your forms today.</p>
           </div>
 
