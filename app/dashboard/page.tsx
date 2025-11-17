@@ -233,7 +233,12 @@ export default function DashboardPage() {
               <h1 className="text-xl font-semibold">FormBuilder</h1>
               <nav className="hidden md:flex items-center gap-6">
                 <button className="text-sm font-medium text-gray-900">Forms</button>
-                <button className="text-sm font-medium text-gray-500 hover:text-gray-900">Analytics</button>
+                <button
+                  onClick={() => router.push("/analytics")}
+                  className="text-sm font-medium text-gray-500 hover:text-gray-900"
+                >
+                  Analytics
+                </button>
                 <button className="text-sm font-medium text-gray-500 hover:text-gray-900">Settings</button>
               </nav>
             </div>
