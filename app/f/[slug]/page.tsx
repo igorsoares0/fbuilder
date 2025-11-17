@@ -154,7 +154,7 @@ export default function PublicFormPage() {
   }
 
   return (
-    <div className="h-screen overflow-auto">
+    <div className="min-h-screen md:h-screen md:overflow-hidden">
       {(() => {
         // Find positioned image (any image with position !== "inline")
         const positionedImage = form.elements.find(el => el.elementType === "image" && el.position !== "inline")
@@ -163,11 +163,25 @@ export default function PublicFormPage() {
         // Filter elements: remove positioned image from regular flow
         const inlineElements = form.elements.filter(el => !(el.elementType === "image" && el.position !== "inline"))
 
+        // Compute background style
+        const backgroundStyle = form.background.type === "color" ? {
+          backgroundColor: form.background.color,
+        } : form.background.type === "gradient" ? {
+          background: `linear-gradient(${form.background.gradientDirection}, ${form.background.gradientFrom}, ${form.background.gradientTo})`,
+        } : form.background.type === "image" && form.background.imageUrl ? {
+          backgroundImage: `url(${form.background.imageUrl})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+        } : {
+          backgroundColor: form.background.color,
+        }
+
         return (
           <div
             className={`${
               position === "background" || position === "none" ? "relative" : "flex"
-            } h-full w-full ${
+            } min-h-screen md:h-full w-full ${
               position === "top"
                 ? "flex-col"
                 : position === "bottom"
@@ -180,6 +194,7 @@ export default function PublicFormPage() {
                 ? ""
                 : "flex-row"
             }`}
+            style={backgroundStyle}
           >
             {/* Positioned Image Section */}
             {position === "background" && positionedImage ? (
@@ -195,14 +210,18 @@ export default function PublicFormPage() {
               <>
                 <style dangerouslySetInnerHTML={{__html: `
                   .positioned-image-container-${positionedImage.id} {
-                    height: ${position === "top" || position === "bottom" ? `${positionedImage.height}%` : position === "left" || position === "right" ? "40vh" : "auto"};
+                    height: ${position === "top" || position === "bottom" ? `${positionedImage.height}vh` : position === "left" || position === "right" ? "40vh" : "auto"};
                     width: 100%;
                     flex-shrink: 0;
+                    max-height: ${position === "left" || position === "right" ? "40vh" : "none"};
                   }
                   @media (min-width: 768px) {
                     .positioned-image-container-${positionedImage.id} {
-                      height: ${position === "top" || position === "bottom" ? `${positionedImage.height}%` : "100%"};
+                      height: ${position === "top" || position === "bottom" ? `${positionedImage.height}vh` : "auto"};
+                      min-height: ${position === "left" || position === "right" ? "100vh" : "auto"};
+                      max-height: none;
                       width: ${position === "left" || position === "right" ? `${positionedImage.width}%` : "100%"};
+                      align-self: stretch;
                     }
                   }
                 `}} />
@@ -213,6 +232,7 @@ export default function PublicFormPage() {
                     src={positionedImage.url}
                     alt={positionedImage.alt}
                     className="h-full w-full object-cover"
+                    style={{ minHeight: undefined }}
                   />
                 </div>
               </>
@@ -229,24 +249,11 @@ export default function PublicFormPage() {
               `}} />
             )}
             <div
-              className={`flex items-center justify-center px-8 py-12 flex-1 self-stretch ${
-                (position === "left" || position === "right") && positionedImage ? `form-section-${positionedImage.id}` : ""
+              className={`flex ${position === "none" ? "items-start" : "items-center"} justify-center px-8 py-12 ${
+                (position === "left" || position === "right") && positionedImage ? `form-section-${positionedImage.id} flex-1 md:overflow-y-auto` : ""
               }`}
               style={{
                 width: '100%',
-                // Apply background settings
-                ...(form.background.type === "color" ? {
-                  backgroundColor: form.background.color,
-                } : form.background.type === "gradient" ? {
-                  background: `linear-gradient(${form.background.gradientDirection}, ${form.background.gradientFrom}, ${form.background.gradientTo})`,
-                } : form.background.type === "image" && form.background.imageUrl ? {
-                  backgroundImage: `url(${form.background.imageUrl})`,
-                  backgroundSize: "cover",
-                  backgroundPosition: "center",
-                  backgroundRepeat: "no-repeat",
-                } : {
-                  backgroundColor: form.background.color,
-                }),
                 ...(position === "background" ? { position: 'relative', zIndex: 10 } : {}),
               }}
             >
