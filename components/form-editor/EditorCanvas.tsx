@@ -48,22 +48,8 @@ export function EditorCanvas() {
             ""
           }`}
         >
-          {/* Positioned Image */}
-          {position === "background" && positionedImage ? (
-            <div
-              className={`absolute inset-0 cursor-pointer ${
-                selectedElement === "image" && selectedElementId === positionedImage.id ? "ring-4 ring-blue-500 ring-inset" : ""
-              }`}
-              onClick={() => selectElement("image", positionedImage.id)}
-            >
-              <img
-                src={positionedImage.url}
-                alt={positionedImage.alt}
-                className="h-full w-full object-cover"
-                style={{ opacity: parseInt(positionedImage.opacity || "100") / 100 }}
-              />
-            </div>
-          ) : position !== "none" && position !== "inline" && positionedImage ? (
+          {/* Positioned Image - Only render for non-background positions */}
+          {position !== "none" && position !== "inline" && position !== "background" && positionedImage ? (
             <div
               className={`relative cursor-pointer bg-[#C9B896] self-stretch ${
                 selectedElement === "image" && selectedElementId === positionedImage.id ? "ring-4 ring-blue-500 ring-inset" : ""
@@ -88,13 +74,22 @@ export function EditorCanvas() {
             className={`flex items-center justify-center ${
               previewMode === "mobile" ? "px-8 py-12" : "px-16 py-20"
             } ${
-              position === "background" ? "relative z-10 min-h-full w-full" :
+              position === "background" ? "relative z-10 min-h-full w-full cursor-pointer" :
               position === "none" ? "relative min-h-full w-full" :
               position !== "inline" && positionedImage ? "flex-1" :
               "relative min-h-full w-full"
+            } ${
+              position === "background" && selectedElement === "image" && selectedElementId === positionedImage?.id ? "ring-4 ring-blue-500 ring-inset" : ""
             }`}
             style={{
-              ...(formBackground.type === "color" ? {
+              // Use image as background if position is "background"
+              ...(position === "background" && positionedImage ? {
+                backgroundImage: `url(${positionedImage.url})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                backgroundRepeat: "no-repeat",
+                opacity: parseInt(positionedImage.opacity || "100") / 100,
+              } : formBackground.type === "color" ? {
                 backgroundColor: formBackground.color,
               } : formBackground.type === "gradient" ? {
                 background: `linear-gradient(${formBackground.gradientDirection}, ${formBackground.gradientFrom}, ${formBackground.gradientTo})`,
@@ -106,6 +101,12 @@ export function EditorCanvas() {
               } : {
                 backgroundColor: formBackground.color,
               }),
+            }}
+            onClick={(e) => {
+              if (position === "background" && positionedImage) {
+                e.stopPropagation()
+                selectElement("image", positionedImage.id)
+              }
             }}
           >
             <div className="w-full max-w-md space-y-6">
