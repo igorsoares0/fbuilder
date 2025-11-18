@@ -1,0 +1,123 @@
+import { FormElement } from "@/types/form-elements"
+
+export function getBlankTemplate(): FormElement[] {
+  return [
+    {
+      id: "heading",
+      elementType: "text",
+      content: "Your heading here",
+      fontFamily: "Inter",
+      fontWeight: "400",
+      fontSize: "32",
+      fontColor: "#000000",
+      lineHeight: "1.2",
+      letterSpacing: "0",
+      textAlign: "left",
+    },
+  ]
+}
+
+export function getDefaultTemplate(): FormElement[] {
+  return [
+    {
+      id: "main-image",
+      elementType: "image",
+      url: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/text-editor-q4PVzyjDcuig9i4hLmgvReaMzJ8hhm.png",
+      alt: "Decorative image",
+      width: "50",
+      height: "100",
+      borderRadius: "0",
+      position: "left",
+      opacity: "100",
+    },
+    {
+      id: "heading",
+      elementType: "text",
+      content: "Unleash your genius",
+      fontFamily: "Georgia",
+      fontWeight: "400",
+      fontSize: "48",
+      fontColor: "#494D3E",
+      lineHeight: "1.2",
+      letterSpacing: "0",
+      textAlign: "left",
+    },
+    {
+      id: "description",
+      elementType: "text",
+      content: "Wondering how to take your creative talent and turn it into a scalable business? You're in good hands, friend. Sign up below to receive my 100% free step-by-step guide on how to launch and grow a creative business that celebrates your genius.",
+      fontFamily: "Arial",
+      fontWeight: "400",
+      fontSize: "14",
+      fontColor: "#6B7280",
+      lineHeight: "1.5",
+      letterSpacing: "0",
+      textAlign: "left",
+    },
+    {
+      id: "field-1",
+      elementType: "field",
+      type: "text",
+      placeholder: "FIRST NAME",
+      label: "FIRST NAME",
+      required: false,
+      fillColor: "transparent",
+      borderColor: "#1F2937",
+      borderWidth: "2",
+      borderRadius: "999",
+      height: "48",
+      fontFamily: "Arial",
+      fontWeight: "400",
+      fontSize: "14",
+      fontColor: "#1F2937",
+      lineHeight: "1",
+      letterSpacing: "0",
+      textAlign: "left",
+    },
+    {
+      id: "field-2",
+      elementType: "field",
+      type: "email",
+      placeholder: "EMAIL ADDRESS",
+      label: "EMAIL ADDRESS",
+      required: false,
+      fillColor: "transparent",
+      borderColor: "#1F2937",
+      borderWidth: "2",
+      borderRadius: "999",
+      height: "48",
+      fontFamily: "Arial",
+      fontWeight: "400",
+      fontSize: "14",
+      fontColor: "#1F2937",
+      lineHeight: "1",
+      letterSpacing: "0",
+      textAlign: "left",
+    },
+    {
+      id: "download-button",
+      elementType: "button",
+      label: "DOWNLOAD",
+      fillColor: "#494D3E",
+      borderColor: "transparent",
+      borderWidth: "0",
+      borderRadius: "999",
+      height: "48",
+      width: "100",
+      fontFamily: "Arial",
+      fontWeight: "500",
+      fontSize: "14",
+      fontColor: "#FFFFFF",
+      lineHeight: "1",
+      letterSpacing: "1",
+      textAlign: "center",
+    },
+  ]
+}
+
+export function getInitialElements(template: string): FormElement[] {
+  if (template === "blank") {
+    return getBlankTemplate()
+  }
+  return getDefaultTemplate()
+}
