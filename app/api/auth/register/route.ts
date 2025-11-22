@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma"
 import { registerSchema } from "@/lib/validations/auth"
 import { generateVerificationToken } from "@/lib/tokens"
 import { sendVerificationEmail } from "@/lib/email"
+import { createFreeSubscription } from "@/lib/subscription"
 
 export async function POST(request: Request) {
   try {
@@ -43,6 +44,9 @@ export async function POST(request: Request) {
         password: hashedPassword,
       },
     })
+
+    // Create free subscription with trial for new user
+    await createFreeSubscription(user.id, email)
 
     // Generate verification token
     const token = await generateVerificationToken(email)

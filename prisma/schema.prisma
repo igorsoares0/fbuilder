@@ -30,6 +30,9 @@ model User {
   accounts      Account[]
   sessions      Session[]
   forms         Form[]
+  subscription  Subscription?
+  invoices      Invoice[]
+  customDomains CustomDomain[]
 
   @@map("users")
 }
@@ -157,4 +160,113 @@ model FormResponse {
   @@index([formId])
   @@index([submittedAt])
   @@map("form_responses")
+}
+
+// ============================================
+// BILLING & SUBSCRIPTIONS
+// ============================================
+
+model Subscription {
+  id                   String              @id @default(cuid())
+  userId               String              @unique
+  user                 User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Stripe IDs
+  stripeCustomerId     String              @unique
+  stripeSubscriptionId String?             @unique
+  stripePriceId        String?
+
+  // Plan Details
+  plan                 PlanType            @default(BASIC)
+  billingCycle         BillingCycle        @default(MONTHLY)
+  status               SubscriptionStatus  @default(TRIALING)
+
+  // Quotas & Limits (BASIC defaults for trial)
+  submissionsLimit     Int                 @default(1000)
+  submissionsUsed      Int                 @default(0)
+  customDomainsLimit   Int                 @default(1)
+  customDomainsUsed    Int                 @default(0)
+  removeBranding       Boolean             @default(true)
+
+  // Trial
+  trialEndsAt          DateTime?
+
+  // Billing dates
+  currentPeriodStart   DateTime?
+  currentPeriodEnd     DateTime?
+  cancelAtPeriodEnd    Boolean             @default(false)
+  canceledAt           DateTime?
+
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+
+  @@index([stripeCustomerId])
+  @@index([stripeSubscriptionId])
+  @@map("subscriptions")
+}
+
+model UsageRecord {
+  id           String     @id @default(cuid())
+  userId       String
+  formId       String?
+  type         UsageType
+  count        Int        @default(1)
+  periodStart  DateTime
+  periodEnd    DateTime
+  createdAt    DateTime   @default(now())
+
+  @@index([userId, periodStart])
+  @@index([formId])
+  @@map("usage_records")
+}
+
+model Invoice {
+  id               String   @id @default(cuid())
+  userId           String
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stripeInvoiceId  String   @unique
+  amount           Int      // in cents
+  currency         String   @default("usd")
+  status           String   // paid, open, void, etc
+  hostedInvoiceUrl String?
+  invoicePdf       String?
+  createdAt        DateTime @default(now())
+
+  @@index([userId])
+  @@map("invoices")
+}
+
+model CustomDomain {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  domain      String   @unique
+  verified    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@map("custom_domains")
+}
+
+enum PlanType {
+  BASIC
+  PRO
+}
+
+enum BillingCycle {
+  MONTHLY
+  YEARLY
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  TRIALING
+  PAST_DUE
+  CANCELED
+  PAUSED
+}
+
+enum UsageType {
+  SUBMISSION
+  DOMAIN
 }

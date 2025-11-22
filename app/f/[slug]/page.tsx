@@ -5,6 +5,7 @@ import { useParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
+import { BrandingBadge } from "@/components/billing/BrandingBadge"
 
 interface FormElement {
   id: string
@@ -25,6 +26,8 @@ interface FormData {
     gradientDirection?: string
     imageUrl?: string
   }
+  userId: string
+  showBranding?: boolean
 }
 
 export default function PublicFormPage() {
@@ -587,6 +590,9 @@ export default function PublicFormPage() {
           </div>
         )
       })()}
+
+      {/* Branding Badge */}
+      <BrandingBadge showBranding={form.showBranding ?? true} />
     </div>
   )
 }

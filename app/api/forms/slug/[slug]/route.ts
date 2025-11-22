@@ -18,8 +18,18 @@ export async function GET(
         elements: true,
         background: true,
         status: true,
+        userId: true,
         createdAt: true,
         publishedAt: true,
+        user: {
+          select: {
+            subscription: {
+              select: {
+                removeBranding: true,
+              },
+            },
+          },
+        },
       },
     })
 
@@ -45,7 +55,14 @@ export async function GET(
       },
     })
 
-    return NextResponse.json(form)
+    // Determine if branding should be shown
+    const showBranding = !form.user.subscription?.removeBranding
+
+    return NextResponse.json({
+      ...form,
+      showBranding,
+      user: undefined, // Remove user data from response
+    })
   } catch (error) {
     console.error('Error fetching form by slug:', error)
     return NextResponse.json(

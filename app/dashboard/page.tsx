@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Progress } from "@/components/ui/progress"
 import {
   Plus,
   Search,
@@ -24,6 +25,11 @@ import {
   BarChart,
   LogOut,
   User,
+  CreditCard,
+  TrendingUp,
+  Crown,
+  AlertCircle,
+  Calendar,
 } from "lucide-react"
 import {
   DropdownMenu,
@@ -50,6 +56,23 @@ interface FormData {
   }
 }
 
+interface UsageStats {
+  submissions: {
+    used: number
+    limit: number
+    percentage: number
+  }
+  domains: {
+    used: number
+    limit: number
+    percentage: number
+  }
+  plan: "BASIC" | "PRO"
+  status: string
+  currentPeriodEnd: string | null
+  trialEndsAt: string | null
+}
+
 export default function DashboardPage() {
   const router = useRouter()
   const { data: session } = useSession()
@@ -61,11 +84,25 @@ export default function DashboardPage() {
   const [publishingForm, setPublishingForm] = useState<FormData | null>(null)
   const [publishSlug, setPublishSlug] = useState("")
   const [publishStatus, setPublishStatus] = useState<"PUBLISHED" | "DRAFT">("PUBLISHED")
+  const [usage, setUsage] = useState<UsageStats | null>(null)
 
-  // Load forms on mount
+  // Load forms and usage on mount
   useEffect(() => {
     loadForms()
+    loadUsage()
   }, [])
+
+  const loadUsage = async () => {
+    try {
+      const response = await fetch('/api/billing/usage')
+      if (response.ok) {
+        const data = await response.json()
+        setUsage(data)
+      }
+    } catch (error) {
+      console.error('Error loading usage:', error)
+    }
+  }
 
   const handleSignOut = async () => {
     await signOut({ callbackUrl: "/login" })
@@ -239,6 +276,12 @@ export default function DashboardPage() {
                 >
                   Analytics
                 </button>
+                <button
+                  onClick={() => router.push("/billing")}
+                  className="text-sm font-medium text-gray-500 hover:text-gray-900"
+                >
+                  Billing
+                </button>
                 <button className="text-sm font-medium text-gray-500 hover:text-gray-900">Settings</button>
               </nav>
             </div>
@@ -295,6 +338,128 @@ export default function DashboardPage() {
             </h2>
             <p className="mt-2 text-gray-600">Here's what's happening with your forms today.</p>
           </div>
+
+          {/* Billing Overview */}
+          {usage && (
+            <div className="mb-8 grid grid-cols-1 gap-5 lg:grid-cols-2">
+              {/* Current Plan Card */}
+              <Card className="border-2 border-blue-100 bg-gradient-to-br from-blue-50 to-white p-6 shadow-sm">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="rounded-lg bg-blue-100 p-2">
+                      {usage.plan === "PRO" ? (
+                        <Crown className="h-5 w-5 text-blue-600" />
+                      ) : (
+                        <CreditCard className="h-5 w-5 text-blue-600" />
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Current Plan</p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-2xl font-bold text-gray-900">{usage.plan}</p>
+                        <Badge
+                          variant={
+                            usage.status === "ACTIVE" ? "default" :
+                            usage.status === "TRIALING" ? "secondary" :
+                            "destructive"
+                          }
+                          className="text-xs"
+                        >
+                          {usage.status}
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => router.push("/billing")}
+                    className="gap-2"
+                  >
+                    <CreditCard className="h-4 w-4" />
+                    Manage
+                  </Button>
+                </div>
+
+                {usage.status === "TRIALING" && usage.trialEndsAt && (
+                  <div className="flex items-start gap-2 rounded-lg bg-amber-50 border border-amber-200 p-3 mb-3">
+                    <AlertCircle className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
+                    <div className="text-sm">
+                      <p className="font-medium text-amber-900">Free trial</p>
+                      <p className="text-amber-700">
+                        Ends {new Date(usage.trialEndsAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {usage.currentPeriodEnd && usage.status === "ACTIVE" && (
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Calendar className="h-4 w-4" />
+                    <span>Next billing: {new Date(usage.currentPeriodEnd).toLocaleDateString()}</span>
+                  </div>
+                )}
+              </Card>
+
+              {/* Usage Card */}
+              <Card className="border-0 bg-white p-6 shadow-sm">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="rounded-lg bg-green-50 p-2">
+                    <TrendingUp className="h-5 w-5 text-green-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Usage This Period</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {usage.submissions.used.toLocaleString()} / {usage.submissions.limit.toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <div>
+                    <div className="flex items-center justify-between text-sm mb-2">
+                      <span className="text-gray-600">Submissions</span>
+                      <span className="font-semibold text-gray-900">
+                        {usage.submissions.percentage}%
+                      </span>
+                    </div>
+                    <Progress
+                      value={Math.min(usage.submissions.percentage, 100)}
+                      className={usage.submissions.percentage >= 100 ? "bg-red-100" : ""}
+                    />
+                    {usage.submissions.percentage >= 80 && (
+                      <p className="text-xs text-amber-600 mt-1">
+                        {usage.submissions.percentage >= 100
+                          ? "Limit reached! Upgrade to accept more submissions."
+                          : "You're running low on submissions."}
+                      </p>
+                    )}
+                  </div>
+
+                  {usage.domains.limit > 0 && (
+                    <div>
+                      <div className="flex items-center justify-between text-sm mb-2">
+                        <span className="text-gray-600">Custom Domains</span>
+                        <span className="font-semibold text-gray-900">
+                          {usage.domains.used} / {usage.domains.limit}
+                        </span>
+                      </div>
+                      <Progress value={usage.domains.percentage} />
+                    </div>
+                  )}
+
+                  <Button
+                    variant="link"
+                    size="sm"
+                    onClick={() => router.push("/billing")}
+                    className="w-full text-xs p-0 h-auto"
+                  >
+                    View detailed usage →
+                  </Button>
+                </div>
+              </Card>
+            </div>
+          )}
 
           {/* Stats Overview */}
           <div className="mb-10 grid grid-cols-1 gap-5 md:grid-cols-3">
