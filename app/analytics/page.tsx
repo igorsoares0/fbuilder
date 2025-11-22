@@ -26,6 +26,7 @@ import { ResponseDistribution } from "@/components/analytics/response-distributi
 import { CompletionRate } from "@/components/analytics/completion-rate"
 import { ConversionFunnel } from "@/components/analytics/conversion-funnel"
 import { CompletionTime } from "@/components/analytics/completion-time"
+import { SubscriptionGate } from "@/components/billing/SubscriptionGate"
 
 interface AnalyticsOverview {
   totalForms: number
@@ -123,9 +124,10 @@ export default function AnalyticsPage() {
   }
 
   return (
-    <div className="flex h-screen flex-col bg-gray-50">
-      {/* Header */}
-      <header className="border-b border-gray-200 bg-white">
+    <SubscriptionGate>
+      <div className="flex h-screen flex-col bg-gray-50">
+        {/* Header */}
+        <header className="border-b border-gray-200 bg-white">
         <div className="mx-auto max-w-7xl px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -314,6 +316,7 @@ export default function AnalyticsPage() {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </SubscriptionGate>
   )
 }

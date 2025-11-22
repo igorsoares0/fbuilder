@@ -49,12 +49,58 @@ export async function getUserSubscription(userId: string) {
 }
 
 /**
+ * Check if user has active/valid subscription
+ * Returns true if user can use the app
+ */
+export async function hasActiveSubscription(userId: string): Promise<boolean> {
+  const subscription = await getUserSubscription(userId)
+
+  if (!subscription) {
+    return false
+  }
+
+  // Allow if ACTIVE
+  if (subscription.status === "ACTIVE") {
+    return true
+  }
+
+  // Allow if TRIALING and trial hasn't expired yet
+  if (subscription.status === "TRIALING" && subscription.trialEndsAt) {
+    const now = new Date()
+    return now <= subscription.trialEndsAt
+  }
+
+  // Block CANCELED, PAST_DUE, PAUSED
+  return false
+}
+
+/**
  * Check if user has exceeded their submission quota
+ * Also checks if subscription is active/valid
  */
 export async function checkSubmissionQuota(userId: string): Promise<boolean> {
   const subscription = await getUserSubscription(userId)
 
   if (!subscription) {
+    return false
+  }
+
+  // Block if subscription is CANCELED
+  if (subscription.status === "CANCELED") {
+    return false
+  }
+
+  // Block if trial has expired and no payment method added
+  if (subscription.status === "TRIALING" && subscription.trialEndsAt) {
+    const now = new Date()
+    if (now > subscription.trialEndsAt) {
+      // Trial expired - block access
+      return false
+    }
+  }
+
+  // Block if subscription is PAST_DUE
+  if (subscription.status === "PAST_DUE") {
     return false
   }
 
@@ -64,6 +110,7 @@ export async function checkSubmissionQuota(userId: string): Promise<boolean> {
     return true
   }
 
+  // Check quota limit
   return subscription.submissionsUsed < subscription.submissionsLimit
 }
 

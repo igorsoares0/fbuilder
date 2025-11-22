@@ -39,6 +39,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { SubscriptionGate } from "@/components/billing/SubscriptionGate"
 
 interface FormData {
   id: string
@@ -261,9 +262,10 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="flex h-screen flex-col bg-gray-50">
-      {/* Header */}
-      <header className="border-b border-gray-200 bg-white">
+    <SubscriptionGate>
+      <div className="flex h-screen flex-col bg-gray-50">
+        {/* Header */}
+        <header className="border-b border-gray-200 bg-white">
         <div className="mx-auto max-w-7xl px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-8">
@@ -789,6 +791,7 @@ export default function DashboardPage() {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+      </div>
+    </SubscriptionGate>
   )
 }

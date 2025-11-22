@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { ArrowLeft, Download } from "lucide-react"
+import { SubscriptionGate } from "@/components/billing/SubscriptionGate"
 
 interface FormResponse {
   id: string
@@ -118,9 +119,10 @@ export default function ResponsesPage() {
   const fieldElements = data.form.elements.filter(el => el.elementType === 'field')
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="border-b border-gray-200 bg-white">
+    <SubscriptionGate>
+      <div className="min-h-screen bg-gray-50">
+        {/* Header */}
+        <header className="border-b border-gray-200 bg-white">
         <div className="mx-auto max-w-7xl px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -208,6 +210,7 @@ export default function ResponsesPage() {
           </div>
         )}
       </div>
-    </div>
+      </div>
+    </SubscriptionGate>
   )
 }
