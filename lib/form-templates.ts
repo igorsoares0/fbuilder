@@ -115,9 +115,110 @@ export function getDefaultTemplate(): FormElement[] {
   ]
 }
 
+export function getTemplate2(): FormElement[] {
+  return [
+    {
+      id: "main-image",
+      elementType: "image",
+      url: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/dried-flowers-beige-background-elegant-minimalist-photo-Y2mH8kX9jKL5pQrN3sT6uW4vZaBcDe.jpg",
+      alt: "Dried flowers on beige background",
+      width: "50",
+      height: "100",
+      borderRadius: "0",
+      position: "left",
+      opacity: "100",
+    },
+    {
+      id: "heading",
+      elementType: "text",
+      content: "Unleash\nyour creativity",
+      fontFamily: "Georgia",
+      fontWeight: "400",
+      fontSize: "56",
+      fontColor: "#FFFFFF",
+      lineHeight: "1.1",
+      letterSpacing: "0",
+      textAlign: "left",
+    },
+    {
+      id: "description",
+      elementType: "text",
+      content: "Wondering how to take your creative talent and turn it into a sustainable business? You're in good hands, friend. Sign up below to receive my 100% free step-by-step guide on how to launch and grow a creative business that celebrates your genius.",
+      fontFamily: "Arial",
+      fontWeight: "400",
+      fontSize: "14",
+      fontColor: "#D1D5DB",
+      lineHeight: "1.6",
+      letterSpacing: "0",
+      textAlign: "left",
+    },
+    {
+      id: "field-1",
+      elementType: "field",
+      type: "text",
+      placeholder: "FIRST NAME",
+      label: "",
+      required: false,
+      fillColor: "transparent",
+      borderColor: "#FFFFFF",
+      borderWidth: "2",
+      borderRadius: "8",
+      height: "52",
+      fontFamily: "Arial",
+      fontWeight: "400",
+      fontSize: "13",
+      fontColor: "#FFFFFF",
+      lineHeight: "1",
+      letterSpacing: "0.5",
+      textAlign: "left",
+    },
+    {
+      id: "field-2",
+      elementType: "field",
+      type: "email",
+      placeholder: "EMAIL ADDRESS",
+      label: "",
+      required: false,
+      fillColor: "transparent",
+      borderColor: "#FFFFFF",
+      borderWidth: "2",
+      borderRadius: "8",
+      height: "52",
+      fontFamily: "Arial",
+      fontWeight: "400",
+      fontSize: "13",
+      fontColor: "#FFFFFF",
+      lineHeight: "1",
+      letterSpacing: "0.5",
+      textAlign: "left",
+    },
+    {
+      id: "download-button",
+      elementType: "button",
+      label: "DOWNLOAD",
+      fillColor: "#E5E7EB",
+      borderColor: "transparent",
+      borderWidth: "0",
+      borderRadius: "8",
+      height: "52",
+      width: "60",
+      fontFamily: "Arial",
+      fontWeight: "600",
+      fontSize: "13",
+      fontColor: "#374151",
+      lineHeight: "1",
+      letterSpacing: "1",
+      textAlign: "center",
+    },
+  ]
+}
+
 export function getInitialElements(template: string): FormElement[] {
   if (template === "blank") {
     return getBlankTemplate()
+  }
+  if (template === "template-2") {
+    return getTemplate2()
   }
   return getDefaultTemplate()
 }

@@ -7,6 +7,7 @@ import { FormElement, ElementType, FormBackground, ActiveTab, ImageElement } fro
 import { useFormHistory } from "@/hooks/useFormHistory"
 import { useFormPersistence } from "@/hooks/useFormPersistence"
 import { getInitialElements } from "@/lib/form-templates"
+import { getDefaultBackground } from "@/lib/helpers/form-templates"
 
 interface FormEditorProviderProps {
   children: ReactNode
@@ -69,6 +70,7 @@ export function FormEditorProvider({ children, formId, template }: FormEditorPro
         }
       } else {
         setFormElements(getInitialElements(template))
+        setFormBackground(getDefaultBackground(template))
         setIsLoading(false)
       }
     }

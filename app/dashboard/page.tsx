@@ -147,7 +147,7 @@ export default function DashboardPage() {
       (form.description && form.description.toLowerCase().includes(searchQuery.toLowerCase()))
   )
 
-  const handleCreateForm = async (template: "default" | "blank") => {
+  const handleCreateForm = async (template: "default" | "template-2" | "blank") => {
     try {
       const response = await fetch('/api/forms', {
         method: 'POST',
@@ -671,27 +671,46 @@ export default function DashboardPage() {
 
       {/* Template Selection Dialog */}
       <Dialog open={showTemplateDialog} onOpenChange={setShowTemplateDialog}>
-        <DialogContent className="sm:max-w-3xl">
+        <DialogContent className="sm:max-w-5xl">
           <DialogHeader>
             <DialogTitle className="text-2xl font-semibold">Create a new form</DialogTitle>
             <p className="text-sm text-gray-600">Choose how you want to start</p>
           </DialogHeader>
-          <div className="grid gap-4 py-6 md:grid-cols-2">
-            {/* Template Option */}
+          <div className="grid gap-4 py-6 md:grid-cols-3">
+            {/* Template 1 */}
             <button
               onClick={() => handleCreateForm("default")}
-              className="group relative overflow-hidden rounded-xl border-2 border-gray-200 bg-white p-8 text-left transition-all hover:border-blue-500 hover:shadow-lg"
+              className="group relative overflow-hidden rounded-xl border-2 border-gray-200 bg-white p-6 text-left transition-all hover:border-blue-500 hover:shadow-lg"
             >
-              <div className="mb-6 flex h-40 items-center justify-center rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50">
-                <Sparkles className="h-16 w-16 text-blue-600" />
+              <div className="mb-4 flex h-32 items-center justify-center rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50">
+                <Sparkles className="h-12 w-12 text-blue-600" />
               </div>
-              <h3 className="mb-2 text-xl font-semibold text-gray-900">Use Template</h3>
-              <p className="text-sm leading-relaxed text-gray-600">
-                Start with a beautiful pre-designed newsletter form. Save time with ready-to-use elements and professional styling.
+              <h3 className="mb-2 text-lg font-semibold text-gray-900">Template 1</h3>
+              <p className="text-xs leading-relaxed text-gray-600">
+                Classic newsletter form with side image layout.
               </p>
-              <div className="mt-6">
-                <Badge className="bg-blue-50 text-blue-700 hover:bg-blue-50 border-blue-200">
-                  ⭐ Recommended
+              <div className="mt-4">
+                <Badge className="bg-blue-50 text-blue-700 hover:bg-blue-50 border-blue-200 text-xs">
+                  ⭐ Popular
+                </Badge>
+              </div>
+            </button>
+
+            {/* Template 2 */}
+            <button
+              onClick={() => handleCreateForm("template-2")}
+              className="group relative overflow-hidden rounded-xl border-2 border-gray-200 bg-white p-6 text-left transition-all hover:border-green-500 hover:shadow-lg"
+            >
+              <div className="mb-4 flex h-32 items-center justify-center rounded-xl bg-gradient-to-br from-green-50 to-emerald-50">
+                <Sparkles className="h-12 w-12 text-green-600" />
+              </div>
+              <h3 className="mb-2 text-lg font-semibold text-gray-900">Template 2</h3>
+              <p className="text-xs leading-relaxed text-gray-600">
+                Modern dark theme with elegant floral imagery.
+              </p>
+              <div className="mt-4">
+                <Badge className="bg-green-50 text-green-700 hover:bg-green-50 border-green-200 text-xs">
+                  ✨ New
                 </Badge>
               </div>
             </button>
@@ -699,18 +718,18 @@ export default function DashboardPage() {
             {/* Blank Option */}
             <button
               onClick={() => handleCreateForm("blank")}
-              className="group relative overflow-hidden rounded-xl border-2 border-gray-200 bg-white p-8 text-left transition-all hover:border-gray-400 hover:shadow-lg"
+              className="group relative overflow-hidden rounded-xl border-2 border-gray-200 bg-white p-6 text-left transition-all hover:border-gray-400 hover:shadow-lg"
             >
-              <div className="mb-6 flex h-40 items-center justify-center rounded-xl bg-gray-50">
-                <FileX className="h-16 w-16 text-gray-400" />
+              <div className="mb-4 flex h-32 items-center justify-center rounded-xl bg-gray-50">
+                <FileX className="h-12 w-12 text-gray-400" />
               </div>
-              <h3 className="mb-2 text-xl font-semibold text-gray-900">Start from Scratch</h3>
-              <p className="text-sm leading-relaxed text-gray-600">
-                Build your form from the ground up. Perfect for custom designs and when you need complete creative control.
+              <h3 className="mb-2 text-lg font-semibold text-gray-900">Start from Scratch</h3>
+              <p className="text-xs leading-relaxed text-gray-600">
+                Build your form from the ground up with complete control.
               </p>
-              <div className="mt-6">
-                <Badge variant="secondary" className="bg-gray-100 text-gray-700 hover:bg-gray-100">
-                  For Advanced Users
+              <div className="mt-4">
+                <Badge variant="secondary" className="bg-gray-100 text-gray-700 hover:bg-gray-100 text-xs">
+                  Advanced
                 </Badge>
               </div>
             </button>

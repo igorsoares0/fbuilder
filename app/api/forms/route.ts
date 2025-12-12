@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { createFormSchema } from '@/lib/validations/form'
-import { getDefaultTemplate, getBlankTemplate, getDefaultBackground } from '@/lib/helpers/form-templates'
+import { getDefaultTemplate, getBlankTemplate, getTemplate2, getDefaultBackground } from '@/lib/helpers/form-templates'
 import { auth } from '@/lib/auth'
 
 // GET /api/forms - List all forms for current user
@@ -64,9 +64,11 @@ export async function POST(request: Request) {
     // Get template elements based on type
     const elements = validatedData.template === 'blank'
       ? getBlankTemplate()
+      : validatedData.template === 'template-2'
+      ? getTemplate2()
       : getDefaultTemplate()
 
-    const background = getDefaultBackground()
+    const background = getDefaultBackground(validatedData.template)
 
     const form = await prisma.form.create({
       data: {
