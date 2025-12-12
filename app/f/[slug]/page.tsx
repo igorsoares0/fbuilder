@@ -157,7 +157,7 @@ export default function PublicFormPage() {
   }
 
   return (
-    <div className="min-h-screen md:h-screen md:overflow-hidden">
+    <div className="min-h-screen overflow-auto">
       {(() => {
         // Find positioned image (any image with position !== "inline")
         const positionedImage = form.elements.find(el => el.elementType === "image" && el.position !== "inline")
@@ -184,7 +184,7 @@ export default function PublicFormPage() {
           <div
             className={`${
               position === "background" || position === "none" ? "relative" : "flex"
-            } min-h-screen md:h-full w-full ${
+            } min-h-screen w-full ${
               position === "top"
                 ? "flex-col"
                 : position === "bottom"
