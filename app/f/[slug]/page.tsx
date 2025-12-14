@@ -156,13 +156,13 @@ export default function PublicFormPage() {
     )
   }
 
-  return (
-    <div className="min-h-screen overflow-auto">
-      {(() => {
-        // Find positioned image (any image with position !== "inline")
-        const positionedImage = form.elements.find(el => el.elementType === "image" && el.position !== "inline")
-        const position = positionedImage?.position || "none"
+  // Find positioned image (any image with position !== "inline")
+  const positionedImage = form.elements.find(el => el.elementType === "image" && el.position !== "inline")
+  const position = positionedImage?.position || "none"
 
+  return (
+    <div className={position === "left" || position === "right" || position === "top" || position === "bottom" ? "h-screen overflow-auto" : "min-h-screen overflow-auto"}>
+      {(() => {
         // Filter elements: remove positioned image from regular flow
         const inlineElements = form.elements.filter(el => !(el.elementType === "image" && el.position !== "inline"))
 
@@ -183,8 +183,8 @@ export default function PublicFormPage() {
         return (
           <div
             className={`${
-              position === "background" || position === "none" ? "relative" : "flex"
-            } min-h-screen w-full ${
+              position === "background" || position === "none" ? "relative min-h-screen" : "flex h-full"
+            } w-full ${
               position === "top"
                 ? "flex-col"
                 : position === "bottom"
@@ -213,29 +213,24 @@ export default function PublicFormPage() {
               <>
                 <style dangerouslySetInnerHTML={{__html: `
                   .positioned-image-container-${positionedImage.id} {
-                    height: ${position === "top" || position === "bottom" ? `${positionedImage.height}vh` : position === "left" || position === "right" ? "40vh" : "auto"};
+                    height: ${position === "top" || position === "bottom" ? `${positionedImage.height}%` : position === "left" || position === "right" ? "40vh" : "auto"};
                     width: 100%;
                     flex-shrink: 0;
-                    max-height: ${position === "left" || position === "right" ? "40vh" : "none"};
                   }
                   @media (min-width: 768px) {
                     .positioned-image-container-${positionedImage.id} {
-                      height: ${position === "top" || position === "bottom" ? `${positionedImage.height}vh` : "auto"};
-                      min-height: ${position === "left" || position === "right" ? "100vh" : "auto"};
-                      max-height: none;
+                      height: ${position === "top" || position === "bottom" ? `${positionedImage.height}%` : position === "left" || position === "right" ? "100%" : "auto"};
                       width: ${position === "left" || position === "right" ? `${positionedImage.width}%` : "100%"};
-                      align-self: stretch;
                     }
                   }
                 `}} />
                 <div
-                  className={`relative positioned-image-container-${positionedImage.id}`}
+                  className={`relative positioned-image-container-${positionedImage.id} bg-[#C9B896]`}
                 >
                   <img
                     src={positionedImage.url}
                     alt={positionedImage.alt}
                     className="h-full w-full object-cover"
-                    style={{ minHeight: undefined }}
                   />
                 </div>
               </>
@@ -252,8 +247,8 @@ export default function PublicFormPage() {
               `}} />
             )}
             <div
-              className={`flex ${position === "none" ? "items-start" : "items-center"} justify-center px-8 py-12 ${
-                (position === "left" || position === "right") && positionedImage ? `form-section-${positionedImage.id} flex-1 md:overflow-y-auto` : ""
+              className={`flex items-center justify-center px-8 py-12 flex-1 self-stretch ${
+                (position === "left" || position === "right") && positionedImage ? `form-section-${positionedImage.id}` : ""
               }`}
               style={{
                 width: '100%',
