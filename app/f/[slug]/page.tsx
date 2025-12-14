@@ -183,7 +183,7 @@ export default function PublicFormPage() {
         return (
           <div
             className={`${
-              position === "background" || position === "none" ? "relative min-h-screen" : "flex min-h-full"
+              position === "background" || position === "none" ? "relative min-h-screen" : "flex min-h-screen md:h-full"
             } w-full ${
               position === "top"
                 ? "flex-col"
