@@ -161,7 +161,7 @@ export default function PublicFormPage() {
   const position = positionedImage?.position || "none"
 
   return (
-    <div className={position === "left" || position === "right" || position === "top" || position === "bottom" ? "h-screen overflow-auto" : "min-h-screen overflow-auto"}>
+    <div className={position === "left" || position === "right" || position === "top" || position === "bottom" ? "min-h-screen md:h-screen overflow-auto" : "min-h-screen overflow-auto"}>
       {(() => {
         // Filter elements: remove positioned image from regular flow
         const inlineElements = form.elements.filter(el => !(el.elementType === "image" && el.position !== "inline"))
@@ -183,7 +183,7 @@ export default function PublicFormPage() {
         return (
           <div
             className={`${
-              position === "background" || position === "none" ? "relative min-h-screen" : "flex h-full"
+              position === "background" || position === "none" ? "relative min-h-screen" : "flex min-h-full"
             } w-full ${
               position === "top"
                 ? "flex-col"
@@ -247,8 +247,8 @@ export default function PublicFormPage() {
               `}} />
             )}
             <div
-              className={`flex items-center justify-center px-8 py-12 flex-1 self-stretch ${
-                (position === "left" || position === "right") && positionedImage ? `form-section-${positionedImage.id}` : ""
+              className={`flex items-center justify-center px-8 py-12 flex-1 ${
+                (position === "left" || position === "right") && positionedImage ? `form-section-${positionedImage.id} md:self-stretch` : ""
               }`}
               style={{
                 width: '100%',
