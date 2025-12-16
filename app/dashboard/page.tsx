@@ -147,7 +147,7 @@ export default function DashboardPage() {
       (form.description && form.description.toLowerCase().includes(searchQuery.toLowerCase()))
   )
 
-  const handleCreateForm = async (template: "default" | "template-2" | "blank") => {
+  const handleCreateForm = async (template: "default" | "template-2" | "template-3" | "template-4" | "template-5" | "template-6" | "template-7" | "template-8" | "blank") => {
     try {
       const response = await fetch('/api/forms', {
         method: 'POST',
@@ -676,7 +676,7 @@ export default function DashboardPage() {
             <DialogTitle className="text-2xl font-semibold">Create a new form</DialogTitle>
             <p className="text-sm text-gray-600">Choose how you want to start</p>
           </DialogHeader>
-          <div className="grid gap-4 py-6 md:grid-cols-3">
+          <div className="grid gap-4 py-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-9">
             {/* Template 1 */}
             <button
               onClick={() => handleCreateForm("default")}
@@ -711,6 +711,120 @@ export default function DashboardPage() {
               <div className="mt-4">
                 <Badge className="bg-green-50 text-green-700 hover:bg-green-50 border-green-200 text-xs">
                   ✨ New
+                </Badge>
+              </div>
+            </button>
+
+            {/* Template 3 */}
+            <button
+              onClick={() => handleCreateForm("template-3")}
+              className="group relative overflow-hidden rounded-xl border-2 border-gray-200 bg-white p-6 text-left transition-all hover:border-amber-500 hover:shadow-lg"
+            >
+              <div className="mb-4 flex h-32 items-center justify-center rounded-xl bg-gradient-to-br from-amber-50 to-orange-50">
+                <Sparkles className="h-12 w-12 text-amber-600" />
+              </div>
+              <h3 className="mb-2 text-lg font-semibold text-gray-900">Template 3</h3>
+              <p className="text-xs leading-relaxed text-gray-600">
+                Discount offer form with centered fashion photography.
+              </p>
+              <div className="mt-4">
+                <Badge className="bg-amber-50 text-amber-700 hover:bg-amber-50 border-amber-200 text-xs">
+                  🎁 Promo
+                </Badge>
+              </div>
+            </button>
+
+            {/* Template 4 */}
+            <button
+              onClick={() => handleCreateForm("template-4")}
+              className="group relative overflow-hidden rounded-xl border-2 border-gray-200 bg-white p-6 text-left transition-all hover:border-purple-500 hover:shadow-lg"
+            >
+              <div className="mb-4 flex h-32 items-center justify-center rounded-xl bg-gradient-to-br from-purple-50 to-violet-50">
+                <Sparkles className="h-12 w-12 text-purple-600" />
+              </div>
+              <h3 className="mb-2 text-lg font-semibold text-gray-900">Template 4</h3>
+              <p className="text-xs leading-relaxed text-gray-600">
+                Customer feedback survey with ratings and questions.
+              </p>
+              <div className="mt-4">
+                <Badge className="bg-purple-50 text-purple-700 hover:bg-purple-50 border-purple-200 text-xs">
+                  📋 Survey
+                </Badge>
+              </div>
+            </button>
+
+            {/* Template 5 */}
+            <button
+              onClick={() => handleCreateForm("template-5")}
+              className="group relative overflow-hidden rounded-xl border-2 border-gray-200 bg-white p-6 text-left transition-all hover:border-indigo-500 hover:shadow-lg"
+            >
+              <div className="mb-4 flex h-32 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-50 to-blue-50">
+                <Sparkles className="h-12 w-12 text-indigo-600" />
+              </div>
+              <h3 className="mb-2 text-lg font-semibold text-gray-900">Template 5</h3>
+              <p className="text-xs leading-relaxed text-gray-600">
+                Professional appointment scheduling form with details.
+              </p>
+              <div className="mt-4">
+                <Badge className="bg-indigo-50 text-indigo-700 hover:bg-indigo-50 border-indigo-200 text-xs">
+                  📅 Booking
+                </Badge>
+              </div>
+            </button>
+
+            {/* Template 6 */}
+            <button
+              onClick={() => handleCreateForm("template-6")}
+              className="group relative overflow-hidden rounded-xl border-2 border-gray-200 bg-white p-6 text-left transition-all hover:border-pink-500 hover:shadow-lg"
+            >
+              <div className="mb-4 flex h-32 items-center justify-center rounded-xl bg-gradient-to-br from-pink-50 to-rose-50">
+                <Sparkles className="h-12 w-12 text-pink-600" />
+              </div>
+              <h3 className="mb-2 text-lg font-semibold text-gray-900">Template 6</h3>
+              <p className="text-xs leading-relaxed text-gray-600">
+                Lead magnet download with checkbox preferences.
+              </p>
+              <div className="mt-4">
+                <Badge className="bg-pink-50 text-pink-700 hover:bg-pink-50 border-pink-200 text-xs">
+                  📥 Download
+                </Badge>
+              </div>
+            </button>
+
+            {/* Template 7 */}
+            <button
+              onClick={() => handleCreateForm("template-7")}
+              className="group relative overflow-hidden rounded-xl border-2 border-gray-200 bg-white p-6 text-left transition-all hover:border-violet-500 hover:shadow-lg"
+            >
+              <div className="mb-4 flex h-32 items-center justify-center rounded-xl bg-gradient-to-br from-violet-50 to-purple-50">
+                <Sparkles className="h-12 w-12 text-violet-600" />
+              </div>
+              <h3 className="mb-2 text-lg font-semibold text-gray-900">Template 7</h3>
+              <p className="text-xs leading-relaxed text-gray-600">
+                Product feedback form with image and rating stars.
+              </p>
+              <div className="mt-4">
+                <Badge className="bg-violet-50 text-violet-700 hover:bg-violet-50 border-violet-200 text-xs">
+                  ⭐ Feedback
+                </Badge>
+              </div>
+            </button>
+
+            {/* Template 8 */}
+            <button
+              onClick={() => handleCreateForm("template-8")}
+              className="group relative overflow-hidden rounded-xl border-2 border-gray-200 bg-white p-6 text-left transition-all hover:border-fuchsia-500 hover:shadow-lg"
+            >
+              <div className="mb-4 flex h-32 items-center justify-center rounded-xl bg-gradient-to-br from-fuchsia-50 to-pink-50">
+                <Sparkles className="h-12 w-12 text-fuchsia-600" />
+              </div>
+              <h3 className="mb-2 text-lg font-semibold text-gray-900">Template 8</h3>
+              <p className="text-xs leading-relaxed text-gray-600">
+                Simple product rating with split layout design.
+              </p>
+              <div className="mt-4">
+                <Badge className="bg-fuchsia-50 text-fuchsia-700 hover:bg-fuchsia-50 border-fuchsia-200 text-xs">
+                  ⭐ Rating
                 </Badge>
               </div>
             </button>

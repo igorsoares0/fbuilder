@@ -4,7 +4,7 @@ import { z } from 'zod'
 export const createFormSchema = z.object({
   title: z.string().min(1, 'Title is required').max(200, 'Title is too long'),
   description: z.string().max(500, 'Description is too long').optional(),
-  template: z.enum(['default', 'template-2', 'blank']).optional().default('default'),
+  template: z.enum(['default', 'template-2', 'template-3', 'template-4', 'template-5', 'template-6', 'template-7', 'template-8', 'blank']).optional().default('default'),
 })
 
 // Schema for updating a form
